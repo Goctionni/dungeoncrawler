@@ -16,12 +16,15 @@
         </div>
       </div>
     </div>
+    {{ activeTexture }} , {{ activeTool }}, x {{ hover ? hover.x : '' }}, y {{ hover ? hover.y : '' }}
   </div>
 </template>
 
 <script lang="ts">
 import { Row, Tile, Tool, MapViewMode } from '@/Map.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+
+type KeypressHandler = (e: KeyboardEvent) => void;
 
 @Component
 export default class Map extends Vue {
@@ -31,14 +34,22 @@ export default class Map extends Vue {
   @Prop() mapViewMode!: MapViewMode;
   @Prop() startTile!: Tile | null;
   hover: Tile | null = null;
+  keydownHandler: KeypressHandler | null = null;
 
   get rowsWithHover(): Row[] {
-    return this.rows.map((row) => {
-      return row.map((tile) => ({
-        ...tile,
-        ...(this.hover?.x === tile.x && this.hover?.y === tile.y ? { [this.activeTool]: this.activeTexture } : {}),
-      }));
+    const { rows, hover, activeTool, activeTexture } = this;
+    const result: Row[] = rows.map((row) => {
+      return row.map((tile) => {
+        const tileWithHover = { ...tile }
+        if (hover && hover.x === tile.x && hover.y === tile.y) {
+          tileWithHover[activeTool] = activeTexture;
+          tileWithHover.faces = [activeTool, ...tileWithHover.faces.filter((face) => face !== activeTool)];
+        }
+        return tileWithHover;
+      });
     });
+    console.log({ result: result.slice().pop()?.slice().pop() });
+    return result;
   }
 
   isStartTile(tile: Tile): boolean {
@@ -57,12 +68,32 @@ export default class Map extends Vue {
     }
   }
 
-  updateTile(tile: Tile): void {
-    this.$emit('updateTile', tile);
+  updateTile(tile: Tile, tool?: Tool): void {
+    if (!tool) tool = this.activeTool;
+    this.$emit('updateTile', { tile, tool });
   }
 
   setStart(tile: Tile): void {
     this.$emit('setStart', tile);
+  }
+
+  created(): void {
+    // create handler
+    this.keydownHandler = (function(this: Map, e: KeyboardEvent) {
+      if (!this.hover) return;
+      if (e.key === 'w') this.updateTile(this.hover, 'north');
+      if (e.key === 'a') this.updateTile(this.hover, 'west');
+      if (e.key === 's') this.updateTile(this.hover, 'south');
+      if (e.key === 'd') this.updateTile(this.hover, 'east');
+      if (e.key === 'f') this.updateTile(this.hover, 'floor');
+      e.preventDefault();
+    }).bind(this);
+    // Bind
+    window.addEventListener('keypress', this.keydownHandler);
+  }
+
+  beforeDestroy(): void {
+    if (this.keydownHandler) window.removeEventListener('keypress', this.keydownHandler);
   }
 }
 </script>

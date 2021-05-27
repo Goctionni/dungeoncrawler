@@ -80,17 +80,19 @@ export default class Editor extends Vue {
     return rows;
   }
 
-  updateTile({ x, y }: Tile): void {
+  updateTile({ tile, tool }: { tile: Tile, tool: Tool }): void {
+    const {x, y} = tile;
     const pos = `${x}:${y}`;
-    const tile = this.tiles[pos] || createEmptyTile(x, y);
-    tile[this.activeTool] = this.activeTexture;
-    // Remove the tool from tile faces
-    tile.faces = tile.faces.filter((face) => face !== this.activeTool);
-    // But if texture isnt empty, add it back
-    if (this.activeTexture) tile.faces.push(this.activeTool);
 
-    if (tile.floor || tile.north || tile.east || tile.south || tile.west) {
-      this.$set(this.tiles, pos, tile);
+    const posTile = this.tiles[pos] || createEmptyTile(x, y);
+    posTile[tool] = this.activeTexture;
+    // Remove the tool from tile faces
+    posTile.faces = posTile.faces.filter((face) => face !== tool);
+    // But if texture isnt empty, add it back
+    if (this.activeTexture) posTile.faces.push(tool);
+
+    if (posTile.floor || posTile.north || posTile.east || posTile.south || posTile.west) {
+      this.$set(this.tiles, pos, posTile);
     } else {
       this.$delete(this.tiles, pos);
     }

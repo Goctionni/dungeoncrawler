@@ -68,13 +68,13 @@ export default class Sidebar extends Vue {
     return viewMap.length ? viewMap.length - 1 : 0;
   }
 
-  mounted() {
+  mounted(): void {
     this.updateCSSVariables();
     Object.assign(window, { viewer: this });
   }
 
   @Watch('map.startTile', { immediate: true, deep: true })
-  initStartingPosition() {
+  initStartingPosition(): void {
     const { startTile } = this.map;
     this.x = startTile.x;
     this.y = startTile.y;

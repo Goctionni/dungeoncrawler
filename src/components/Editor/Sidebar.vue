@@ -12,14 +12,15 @@
     </div>
     <div class="tools">
       <h2>Face</h2>
-      <div>
+      <div class="faces">
         <button
           v-for="tool in tools"
           :key="tool"
           type="button"
+          class="tool--face"
           :class="{ active: tool === activeTool, [tool]: true}"
           @click="setTool(tool)"
-        >{{ tool }}</button>
+        >{{ keyBindings[tool] }}</button>
       </div>
     </div>
     <div class="textures">
@@ -50,6 +51,14 @@ export default class Sidebar extends Vue {
   @Prop() textures!: string[];
   @Prop() mapSizeX!: number;
   @Prop() mapSizeY!: number;
+
+  keyBindings: {[tool in Tool]: string} = {
+    floor: 'f',
+    north: 'w',
+    east: 'd',
+    south: 's',
+    west: 'a',
+  };
 
   get mapSizeXModel(): number {
     return this.mapSizeX;
@@ -180,33 +189,52 @@ export default class Sidebar extends Vue {
 }
 
 .tools {
+  .faces {
+    display: inline-grid;
+    grid-template-areas:
+      "x north y"
+      "west floor east"
+      "z south a";
+    background-color: #CCC;
+    padding: 5px;
+  }
+
   button {
-    color: transparent;
-    font-size: 0;
     width: 40px;
     height: 40px;
     border: solid rgba(0, 0, 0, .15) 1px;
     background-color: #F4F4F4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: bold;
 
     &.floor {
       background-color: #999;
       border: 0;
+      grid-area: floor;
     }
 
     &.north {
       border-top: solid #000 2px;
+      grid-area: north;
     }
 
     &.east {
       border-right: solid #000 2px;
+      grid-area: east;
     }
 
     &.south {
       border-bottom: solid #000 2px;
+      grid-area: south;
     }
 
     &.west {
       border-left: solid #000 2px;
+      grid-area: west;
     }
   }
 }
