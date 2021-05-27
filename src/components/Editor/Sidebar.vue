@@ -30,7 +30,7 @@
           v-for="texture in textures"
           :key="texture"
           type="button"
-          :class="{ active: texture === activeTexture, [texture]: true}"
+          :class="{ active: texture === activeTexture, [`texture__${texture}`]: true}"
           @click="setTexture(texture)"
         >{{ texture }}</button>
       </div>
@@ -133,7 +133,6 @@ export default class Sidebar extends Vue {
 
 <style lang="scss" scoped>
 @import '../../faces';
-@import '../../textures';
 
 .sidebar {
   padding: 0 20px;
@@ -230,7 +229,8 @@ export default class Sidebar extends Vue {
 
 .tools {
   .faces {
-    display: inline-grid;
+    display: grid;
+    width: fit-content;
     grid-template-areas:
       "x north y"
       "west floor east"

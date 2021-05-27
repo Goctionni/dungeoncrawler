@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import { Component, Vue, Prop, Watch, InjectReactive } from 'vue-property-decorator';
 
 import { Row, Tile, Tool, tools, MapViewMode } from '../../Map.types';
 
@@ -63,8 +63,12 @@ export default class Editor extends Vue {
   tiles: { [pos: string]: Tile } = {};
   tools: Tool[] = tools.slice();
   activeTool: Tool = 'floor';
-  textures: string[] = ['', 'ph1', 'ph2', 'ph3', 'ph4', 'ph5', 'ph6', 'ph7'];
   activeTexture = '';
+
+  @InjectReactive() texturesMap!: Record<string, string>;
+  get textures(): string[] {
+    return ['', ...Object.keys(this.texturesMap)];
+  }
 
   get rows(): Row[] {
     const { mapSizeX, mapSizeY, tiles } = this;
@@ -106,6 +110,12 @@ export default class Editor extends Vue {
   @Watch('rows')
   emitUpdate(): void {
     this.$emit('map', { rows: this.rows, startTile: this.startTile });
+  }
+
+  created(): void {
+    setTimeout(() => {
+      this.$set(this.texturesMap, 'boop', `background-color:  #369`);
+    }, 3000);
   }
 }
 </script>

@@ -30,13 +30,18 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
 
 import { Map } from './Map.types';
 import Editor from './components/Editor/Editor.vue';
 import Viewer from './components/Viewer/Viewer.vue';
 
 type AppState = 'editor' | 'viewer';
+interface TwineDungeonCrawlerData {
+  activeSave?: string;
+}
+
+const lsPrefix = 'tdc_';
 
 @Component({
   components: {
@@ -47,9 +52,66 @@ type AppState = 'editor' | 'viewer';
 export default class App extends Vue {
   state: AppState = 'editor';
   map: Map | null = null;
+  styleElement!: HTMLStyleElement;
+
+  @ProvideReactive() texturesMap: Record<string, string> = {};
+
+  get textureCSS(): string {
+    return Object.keys(this.texturesMap).reduce((css, name) => {
+      return css + `.texture__${name} { ${this.texturesMap[name]} } `;
+    }, '');
+  }
 
   updateMap(map: Map): void {
     this.map = map;
+  }
+
+  initSaves(): boolean {
+    const data: TwineDungeonCrawlerData = JSON.parse(localStorage[`${lsPrefix}global`] || '{}');
+    if (!data?.activeSave) {
+      return false;
+    } else {
+      return this.loadSave(data.activeSave);
+    }
+  }
+
+  loadSave(name: string): boolean {
+    if (!localStorage[`${lsPrefix}${name}`]) return false;
+    // actually load stuff
+    return true;
+  }
+
+  initDefaultTextures(): void {
+    this.$set(this.texturesMap, 'ph1', `background-color: #f00`);
+    this.$set(this.texturesMap, 'ph2', `background-color: #0f0`);
+    this.$set(this.texturesMap, 'ph3', `background-color: #00f`);
+    this.$set(this.texturesMap, 'ph4', `background-color: #ff0`);
+    this.$set(this.texturesMap, 'ph5', `background-color: #f0f`);
+    this.$set(this.texturesMap, 'ph6', `background-color: #0ff`);
+    this.$set(this.texturesMap, 'ph7', `background-color: #999`);
+  }
+
+  initStyleTarget(): void {
+    const oldStylElements = document.head.querySelectorAll(`style[data-tdc]`);
+    while (oldStylElements.length) {
+      oldStylElements[0].remove();
+    }
+
+    this.styleElement = document.createElement('style');
+    this.styleElement.setAttribute('data-tdc', '');
+    document.head.appendChild(this.styleElement);
+  }
+
+  @Watch('textureCSS')
+  updateDomTextureCSS(): void {
+    this.styleElement.innerHTML = this.textureCSS;
+  }
+
+  created(): void {
+    this.initStyleTarget();
+    if (!this.initSaves()) {
+      this.initDefaultTextures();
+    }
   }
 }
 </script>

@@ -144,7 +144,6 @@ export default class Sidebar extends Vue {
 
 <style lang="scss" scoped>
 @import '../../faces';
-@import '../../textures';
 
 .viewport {
   --viewportSize: 800px;

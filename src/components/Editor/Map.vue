@@ -12,7 +12,7 @@
           @mouseleave="mouseLeave(tile)"
           @dblclick="setStart(tile)"
         >
-          <div v-for="face in tile.faces" :key="`${r},${c},${face}`" :class="`face ${face} ${tile[face]}`"></div>
+          <div v-for="face in tile.faces" :key="`${r},${c},${face}`" :class="`face ${face} texture__${tile[face]}`"></div>
         </div>
       </div>
     </div>
@@ -97,7 +97,6 @@ export default class Map extends Vue {
 
 <style lang="scss" scoped>
 @import '../../faces';
-@import '../../textures';
 
 .container {
   overflow: hidden;
