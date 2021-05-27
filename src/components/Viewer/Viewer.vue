@@ -9,7 +9,7 @@
               v-for="(tile, c) in row"
               :key="`${r},${c}`"
             >
-              <div v-for="face in tile.faces" :key="`viewer_${r},${c},${face}`" :class="`face ${face} ${tile[face]}`"></div>
+              <div v-for="face in tile.faces" :key="`viewer_${r},${c},${face}`" :class="`face ${face} texture__${tile[face]}`"></div>
             </div>
           </div>
         </div>
