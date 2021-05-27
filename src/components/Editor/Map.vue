@@ -16,7 +16,6 @@
         </div>
       </div>
     </div>
-    {{ activeTexture }} , {{ activeTool }}, x {{ hover ? hover.x : '' }}, y {{ hover ? hover.y : '' }}
   </div>
 </template>
 
@@ -38,7 +37,7 @@ export default class Map extends Vue {
 
   get rowsWithHover(): Row[] {
     const { rows, hover, activeTool, activeTexture } = this;
-    const result: Row[] = rows.map((row) => {
+    return rows.map((row) => {
       return row.map((tile) => {
         const tileWithHover = { ...tile }
         if (hover && hover.x === tile.x && hover.y === tile.y) {
@@ -48,8 +47,6 @@ export default class Map extends Vue {
         return tileWithHover;
       });
     });
-    console.log({ result: result.slice().pop()?.slice().pop() });
-    return result;
   }
 
   isStartTile(tile: Tile): boolean {

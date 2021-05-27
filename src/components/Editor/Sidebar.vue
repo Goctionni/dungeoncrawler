@@ -42,6 +42,8 @@
 import { Tool, MapViewMode } from '@/Map.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
+type WheelHandler = (e: WheelEvent) => void;
+
 @Component
 export default class Sidebar extends Vue {
   @Prop() activeTool!: Tool;
@@ -52,6 +54,7 @@ export default class Sidebar extends Vue {
   @Prop() mapSizeX!: number;
   @Prop() mapSizeY!: number;
 
+  wheelHandler: WheelHandler | null = null;
   keyBindings: {[tool in Tool]: string} = {
     floor: 'f',
     north: 'w',
@@ -88,6 +91,43 @@ export default class Sidebar extends Vue {
   setTool(tool: string): void {
     this.$emit('setTool', tool);
   }
+
+  nextTexture(): void {
+    console.log('nextTexture');
+    const currentIndex = this.textures.indexOf(this.activeTexture);
+    if ((currentIndex + 1) >= this.textures.length) {
+      this.setTexture(this.textures[0]);
+    } else {
+      this.setTexture(this.textures[currentIndex + 1]);
+    }
+  }
+
+  lastTexture(): void {
+    console.log('lastTexture');
+    const currentIndex = this.textures.indexOf(this.activeTexture);
+    if ((currentIndex - 1) < 0) {
+      this.setTexture(this.textures.slice().pop() as Tool);
+    } else {
+      this.setTexture(this.textures[currentIndex - 1]);
+    }
+  }
+
+  created(): void {
+    // create handler
+    this.wheelHandler = (function(this: Sidebar, e: WheelEvent) {
+      if (!e.shiftKey) return;
+      e.preventDefault();
+      if (e.deltaY > 0) this.nextTexture();
+      else if (e.deltaY < 0) this.lastTexture();
+    }).bind(this);
+    // Bind
+    window.addEventListener('wheel', this.wheelHandler, { passive: false });
+  }
+
+  beforeDestroy(): void {
+    if (this.wheelHandler) window.removeEventListener('wheel', this.wheelHandler);
+  }
+
 }
 </script>
 
