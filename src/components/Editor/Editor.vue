@@ -27,25 +27,14 @@
 </template>
 
 <script lang="ts">
+import { Texture } from '@/Texture.types';
 import { Component, Vue, Prop, Watch, InjectReactive } from 'vue-property-decorator';
 
-import { Row, Tile, Tool, tools, MapViewMode } from '../../Map.types';
+import { Row, Tile, Tool, tools, MapViewMode } from '@/Map.types';
+import { createEmptyTile } from '@/util';
 
 import Map from './Map.vue';
 import Sidebar from './Sidebar.vue';
-
-const createEmptyTile = (x: number, y: number): Tile => {
-  return {
-    x,
-    y,
-    floor: '',
-    north: '',
-    east: '',
-    south: '',
-    west: '',
-    faces: [],
-  }
-};
 
 @Component({
   components: {
@@ -65,9 +54,9 @@ export default class Editor extends Vue {
   activeTool: Tool = 'floor';
   activeTexture = '';
 
-  @InjectReactive() texturesMap!: Record<string, string>;
+  @InjectReactive() textureList!: Texture[];
   get textures(): string[] {
-    return ['', ...Object.keys(this.texturesMap)];
+    return this.textureList.map((texture) => texture.name);
   }
 
   get rows(): Row[] {
@@ -110,12 +99,6 @@ export default class Editor extends Vue {
   @Watch('rows')
   emitUpdate(): void {
     this.$emit('map', { rows: this.rows, startTile: this.startTile });
-  }
-
-  created(): void {
-    setTimeout(() => {
-      this.$set(this.texturesMap, 'boop', `background-color:  #369`);
-    }, 3000);
   }
 }
 </script>

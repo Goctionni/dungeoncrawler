@@ -32,9 +32,11 @@
 <script lang="ts">
 import { Component, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
 
-import { Map } from './Map.types';
-import Editor from './components/Editor/Editor.vue';
-import Viewer from './components/Viewer/Viewer.vue';
+import { Map } from '@/Map.types';
+import { Texture } from '@/Texture.types';
+
+import Editor from '@/components/Editor/Editor.vue';
+import Viewer from '@/components/Viewer/Viewer.vue';
 
 type AppState = 'editor' | 'viewer';
 interface TwineDungeonCrawlerData {
@@ -54,12 +56,21 @@ export default class App extends Vue {
   map: Map | null = null;
   styleElement!: HTMLStyleElement;
 
-  @ProvideReactive() texturesMap: Record<string, string> = {};
+  @ProvideReactive() textureList: Texture[] = [];
 
   get textureCSS(): string {
-    return Object.keys(this.texturesMap).reduce((css, name) => {
-      return css + `.texture__${name} { ${this.texturesMap[name]} } `;
-    }, '');
+    return this.textureList.map((texture): string => {
+      let cssBody = '';
+      for (const property of texture.properties) {
+        const { name, value } = property;
+        if (!value) { // Specialcase! Probably like `&::before` { or whatever
+          cssBody += name.replace(/&/g, `.texture__${name}`);
+        } else {
+          cssBody += `${name}: ${value};`;
+        }
+      }
+      return `.texture__${texture.name} { ${cssBody} }`;
+    }).join(' ');
   }
 
   updateMap(map: Map): void {
@@ -82,19 +93,19 @@ export default class App extends Vue {
   }
 
   initDefaultTextures(): void {
-    this.$set(this.texturesMap, 'ph1', `background-color: #f00`);
-    this.$set(this.texturesMap, 'ph2', `background-color: #0f0`);
-    this.$set(this.texturesMap, 'ph3', `background-color: #00f`);
-    this.$set(this.texturesMap, 'ph4', `background-color: #ff0`);
-    this.$set(this.texturesMap, 'ph5', `background-color: #f0f`);
-    this.$set(this.texturesMap, 'ph6', `background-color: #0ff`);
-    this.$set(this.texturesMap, 'ph7', `background-color: #999`);
+    this.textureList.push({ name: 'ph1', properties: [{ name: 'background-color', value: '#f00' }] });
+    this.textureList.push({ name: 'ph2', properties: [{ name: 'background-color', value: '#0f0' }] });
+    this.textureList.push({ name: 'ph3', properties: [{ name: 'background-color', value: '#00f' }] });
+    this.textureList.push({ name: 'ph4', properties: [{ name: 'background-color', value: '#ff0' }] });
+    this.textureList.push({ name: 'ph5', properties: [{ name: 'background-color', value: '#f0f' }] });
+    this.textureList.push({ name: 'ph6', properties: [{ name: 'background-color', value: '#0ff' }] });
+    this.textureList.push({ name: 'ph7', properties: [{ name: 'background-color', value: '#999' }] });
   }
 
   initStyleTarget(): void {
-    const oldStylElements = document.head.querySelectorAll(`style[data-tdc]`);
+    const oldStylElements = Array.from(document.head.querySelectorAll(`style[data-tdc]`));
     while (oldStylElements.length) {
-      oldStylElements[0].remove();
+      oldStylElements.pop()?.remove();
     }
 
     this.styleElement = document.createElement('style');

@@ -1,15 +1,17 @@
 <template>
   <div class="viewer" v-if="show">
     <div class="viewport">
-      <div class="map">
-        <div class="scene">
-          <div class="row" v-for="(row, r) in viewMap" :key="r">
-            <div
-              class="tile"
-              v-for="(tile, c) in row"
-              :key="`${r},${c}`"
-            >
-              <div v-for="face in tile.faces" :key="`viewer_${r},${c},${face}`" :class="`face ${face} texture__${tile[face]}`"></div>
+      <div class="tilt">
+        <div class="player" :class="`facing-${facing}`">
+          <div class="map">
+            <div class="row" v-for="(row, r) in viewMap" :key="r">
+              <div
+                class="tile"
+                v-for="(tile, c) in row"
+                :key="`${r},${c}`"
+              >
+                <div v-for="face in tile.faces" :key="`viewer_${r},${c},${face}`" :class="`face ${face} texture__${tile[face]}`"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -21,6 +23,7 @@
 <script lang="ts">
 import { Map, Row } from "@/Map.types";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import { createEmptyTile } from '@/util';
 
 type Facing = 'north' | 'east' | 'south' | 'west';
 
@@ -33,44 +36,50 @@ export default class Sidebar extends Vue {
   y = 0;
 
   get viewMap(): Row[] {
-    return this.createViewMap().map((row, index, arr) => {
-      if (index !== arr.length - 1) {
-        return row;
-      } else {
-        return row.map((tile) => ({
-          ...tile,
-          south: '',
-        }));
-      }
+    const facing = this?.facing || 'north';
+    const rows = this.map?.rows || [];
+    const { x, y } = this;
+
+    return rows.map((row) => {
+      return row.map((tile) => {
+        switch (facing) {
+          case 'north':
+            if (tile.y > y) return createEmptyTile(tile.x, tile.y);
+            else if (tile.y === y) return { ...tile, south: '' };
+            else return { ...tile };
+          case 'east':
+            if (tile.x > x) return createEmptyTile(tile.x, tile.y);
+            else if (tile.x === x) return { ...tile, west: '' };
+            else return { ...tile };
+          case 'south':
+            if (tile.y < y) return createEmptyTile(tile.x, tile.y);
+            else if (tile.y === y) return { ...tile, north: '' };
+            else return { ...tile };
+          case 'west':
+            if (tile.x < x) return createEmptyTile(tile.x, tile.y);
+            else if (tile.x === x) return { ...tile, east: '' };
+            else return { ...tile };
+          default:
+            return { ...tile };
+        }
+      });
     });
   }
 
   get viewXOffset(): number {
-    const { rows } = this.map;
-    const { x, y } = this;
-
-    switch (this.facing) {
-      case 'north':
-        return x;
-      case 'south':
-        return rows[0].length - x;
-      case 'east':
-        return y;
-      case 'west':
-        return rows.length - y;
-      default:
-        return 0;
-    }
+    return this.x;
   }
 
   get viewYOffset(): number {
-    const { viewMap } = this;
-    return viewMap.length ? viewMap.length - 1 : 0;
+    return this.y;
   }
 
   mounted(): void {
     this.updateCSSVariables();
     Object.assign(window, { viewer: this });
+    setInterval(() => {
+      this.rotateCW();
+    }, 3000);
   }
 
   @Watch('map.startTile', { immediate: true, deep: true })
@@ -80,64 +89,29 @@ export default class Sidebar extends Vue {
     this.y = startTile.y;
   }
 
-  createViewMap(): Row[] {
-    const { facing } = this;
-    const { startTile, rows } = this.map;
-    if (!startTile) return [];
-
-    // TODO: I also need to rotate all the north east south west textures, when not facing north
-    switch(facing) {
-      case 'north':
-        return rows.slice(0, this.y + 1);
-      case 'south':
-        return rows.slice(this.y).reverse().map((row) => row.slice().reverse());
-      case 'east':
-        {
-          const rotated: Row[] = [];
-          const oldW = rows[0].length;
-          const oldH = rows.length;
-          for (let y = 0; y < oldW; y++) {
-            const rotatedRow: Row = [];
-            for (let x = 0; x < oldH; x++) {
-              let oldY = x;
-              let oldX = oldH - y;
-              rotatedRow.push({
-                ...rows[oldY][oldX],
-              })
-            }
-            rotated.push(rotatedRow);
-          }
-          return rotated.slice(0, this.x + 1);
-        }
-      case 'west':
-        {
-          const rotated: Row[] = [];
-          const oldW = rows[0].length;
-          const oldH = rows.length;
-          for (let y = 0; y < oldW; y++) {
-            const rotatedRow: Row = [];
-            for (let x = 0; x < oldH; x++) {
-              let oldY = oldW - x;
-              let oldX = y;
-              rotatedRow.push({
-                ...rows[oldY][oldX],
-              })
-            }
-            rotated.push(rotatedRow);
-          }
-          return rotated.slice(0, oldW - this.x);
-        }
-      default:
-        return [];
-    }
-  }
-
   @Watch('viewXOffset')
   @Watch('viewYOffset')
   updateCSSVariables(): void {
     if (!this.$el) return;
     (this.$el as HTMLElement).style.setProperty('--viewportXOffset', this.viewXOffset.toString());
     (this.$el as HTMLElement).style.setProperty('--viewportYOffset', this.viewYOffset.toString());
+  }
+
+  rotateCW(): void {
+    switch(this.facing) {
+      case 'north':
+        this.facing = 'east';
+        break;
+      case 'east':
+        this.facing = 'south';
+        break;
+      case 'south':
+        this.facing = 'west';
+        break;
+      case 'west':
+        this.facing = 'north';
+        break;
+    }
   }
 }
 </script>
@@ -160,18 +134,52 @@ export default class Sidebar extends Vue {
 }
 
 .map {
-  
-  transform-origin: bottom;
-}
-
-.scene {
   position: absolute;
   left: calc(-1 * var(--viewportXOffset) * var(--viewportSize));
   top: calc(-1 * var(--viewportYOffset) * var(--viewportSize));
+  transition: left ease-in-out .5s, top ease-in-out .5s;
+}
+
+.player.facing-north {
+  transform: rotateZ(0deg);
+  .map {
+    top: calc(-1 * (var(--viewportYOffset) - 0.5) * var(--viewportSize));
+  }
+}
+.player.facing-east {
+  transform: rotateZ(90deg);
+  .map {
+    left: calc(-1 * (var(--viewportXOffset) - 0.5) * var(--viewportSize));
+  }
+}
+.player.facing-south {
+  transform: rotateZ(180deg);
+  .map {
+    top: calc(-1 * (var(--viewportYOffset) + 0.5) * var(--viewportSize));
+  }
+}
+.player.facing-west {
+  transform: rotateZ(270deg);
+  .map {
+    left: calc(-1 * (var(--viewportXOffset) + 0.5) * var(--viewportSize));
+  }
+}
+
+.player, .tilt {
+  width: var(--viewportSize);
+  height: var(--viewportSize);
+}
+
+.player {
+  transition: transform ease-in-out .5s;
+}
+
+.tilt {
   transform-style: preserve-3d;
   transform: rotateX(90deg);
   transform-origin: bottom;
 }
+
 
 .row {
   display: flex;

@@ -1,5 +1,11 @@
 <template>
   <div class="sidebar">
+    <TextureEditor
+      v-if="editingTexture !== null"
+      :textureName="editingTexture"
+      @close="editingTexture = null"
+      @save="saveTexture(editingTexture, $event)"
+    />
     <div class="mapsize">
       <h2>Map size</h2>
       <label><input type="number" v-model="mapSizeXModel"> wide</label>
@@ -17,7 +23,7 @@
           v-for="tool in tools"
           :key="tool"
           type="button"
-          class="tool--face"
+          class="tool-btn"
           :class="{ active: tool === activeTool, [tool]: true}"
           @click="setTool(tool)"
         >{{ keyBindings[tool] }}</button>
@@ -27,12 +33,29 @@
       <h2>Texture</h2>
       <div>
         <button
+          type="button"
+          class="texture-btn"
+          @click="setTexture('')"
+          :class="{ active: activeTexture === '', texture__: true}"
+        >Clear</button>
+
+        <button
           v-for="texture in textures"
           :key="texture"
           type="button"
+          class="texture-btn"
           :class="{ active: texture === activeTexture, [`texture__${texture}`]: true}"
           @click="setTexture(texture)"
-        >{{ texture }}</button>
+        >
+          <button class="edit-texture" @click="editTexture(texture)">Edit</button>
+          <button class="remove-texture" @click="removeTexture(texture)">Remove</button>
+          {{ texture }}
+        </button>
+        <button
+          type="button"
+          class="texture-btn texture-new"
+          @click="newTexture()"
+        >New Texture</button>
       </div>
     </div>
   </div>
@@ -40,6 +63,7 @@
 
 <script lang="ts">
 import { Tool, MapViewMode } from '@/Map.types';
+import { Texture } from '@/Texture.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 type WheelHandler = (e: WheelEvent) => void;
@@ -54,6 +78,7 @@ export default class Sidebar extends Vue {
   @Prop() mapSizeX!: number;
   @Prop() mapSizeY!: number;
 
+  editingTexture: string | null = null;
   wheelHandler: WheelHandler | null = null;
   keyBindings: {[tool in Tool]: string} = {
     floor: 'f',
@@ -110,6 +135,18 @@ export default class Sidebar extends Vue {
     } else {
       this.setTexture(this.textures[currentIndex - 1]);
     }
+  }
+
+  editTexture(texture: string): void {
+    this.editingTexture = texture;
+  }
+
+  removeTexture(texture: string): void {
+    this.$emit('removeTexture', texture);
+  }
+
+  saveTexture(oldName: string, texture: Texture): void {
+    this.$emit('saveTexture', { oldName, texture });
   }
 
   created(): void {
@@ -239,7 +276,7 @@ export default class Sidebar extends Vue {
     padding: 5px;
   }
 
-  button {
+  .tool-btn {
     width: 40px;
     height: 40px;
     border: solid rgba(0, 0, 0, .15) 1px;
@@ -280,9 +317,50 @@ export default class Sidebar extends Vue {
 }
 
 .textures {
-  button {
+  .texture-btn {
     width: 100px;
     height: 100px;
+    color: #000;
+    text-shadow: -1px -1px 0 #FFF,
+        0   -1px 0 #FFF,
+        1px -1px 0 #FFF,
+        1px  0   0 #FFF,
+        1px  1px 0 #FFF,
+        0    1px 0 #FFF,
+        -1px  1px 0 #FFF,
+        -1px  0   0 #FFF;    
+
+    .remove-texture,
+    .edit-texture {
+      position: absolute;
+      top: 0;
+      padding: 0;
+      background: 0;
+      border: 0;
+      font-size: 12px;
+      color: #FFF;
+      text-shadow: -1px -1px 0 #000,
+          0   -1px 0 #000,
+          1px -1px 0 #000,
+          1px  0   0 #000,
+          1px  1px 0 #000,
+          0    1px 0 #000,
+          -1px  1px 0 #000,
+          -1px  0   0 #000;    
+
+      &:hover {
+        outline: 0;
+        text-decoration: underline;
+      }
+    }
+
+    .remove-texture {
+      right: 10px;
+    }
+
+    .edit-texture {
+      left: 10px;
+    }
   }
 }
 
