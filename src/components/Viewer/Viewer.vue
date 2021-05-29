@@ -35,6 +35,7 @@
 
 <script lang="ts">
 import { Map, Tile } from "@/Map.types";
+import { createEmptyTile } from "@/util";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
 type Facing = 'north' | 'east' | 'south' | 'west';
@@ -74,23 +75,27 @@ export default class Sidebar extends Vue {
       return row.map((tile) => {
         switch (facing) {
           case 'north':
-            if (tile.y > y) return { ...tile, hide: true };
+            if (tile.y - y > 2) return createEmptyTile(tile.x, tile.y);
+            else if (tile.y > y) return { ...tile, hide: true };
             else if (tile.y === y) return { ...tile, fade: 'south' };
-            else return { ...tile };
+            else return tile;
           case 'east':
+            if (x - tile.x > 2) return createEmptyTile(tile.x, tile.y);
             if (tile.x < x) return { ...tile, hide: true };
             else if (tile.x === x) return { ...tile, fade: 'west' };
-            else return { ...tile };
+            else return tile;
           case 'south':
+            if (y - tile.y > 2) return createEmptyTile(tile.x, tile.y);
             if (tile.y < y) return { ...tile, hide: true };
             else if (tile.y === y) return { ...tile, fade: 'north' };
-            else return { ...tile };
+            else return tile;
           case 'west':
+            if (tile.x - x > 2) return createEmptyTile(tile.x, tile.y);
             if (tile.x > x) return { ...tile, hide: true };
             else if (tile.x === x) return { ...tile, fade: 'east' };
-            else return { ...tile };
+            else return tile;
           default:
-            return { ...tile };
+            return tile;
         }
       });
     });
