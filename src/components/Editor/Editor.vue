@@ -22,6 +22,8 @@
       @setMapViewMode="mapViewMode = $event"
       @setMapSizeX="mapSizeX = $event"
       @setMapSizeY="mapSizeY = $event"
+      @saveTexture="saveTexture($event)"
+      @removeTexture="removeTextureByName($event)"
     />
   </div>
 </template>
@@ -88,6 +90,22 @@ export default class Editor extends Vue {
       this.$set(this.tiles, pos, posTile);
     } else {
       this.$delete(this.tiles, pos);
+    }
+  }
+
+  saveTexture({ oldName, texture }: { oldName: string, texture: Texture }): void {
+    let obj = this.textureList.find((oldTexture) => oldTexture.name === oldName);
+    if (!obj) {
+      this.textureList.push(texture);
+    } else {
+      Object.assign(obj, texture);
+    }
+  }
+
+  removeTextureByName(name: string): void {
+    const index = this.textureList.findIndex((texture) => texture.name === name);
+    if (index >= 0) {
+      this.textureList.splice(index, 1);
     }
   }
 

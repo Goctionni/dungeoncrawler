@@ -47,8 +47,8 @@
           :class="{ active: texture === activeTexture, [`texture__${texture}`]: true}"
           @click="setTexture(texture)"
         >
-          <button class="edit-texture" @click="editTexture(texture)">Edit</button>
-          <button class="remove-texture" @click="removeTexture(texture)">Remove</button>
+          <button class="edit-texture" @click.prevent.stop="editTexture(texture)">Edit</button>
+          <button class="remove-texture" @click.prevent.stop="removeTexture(texture)">Remove</button>
           {{ texture }}
         </button>
         <button
@@ -66,9 +66,15 @@ import { Tool, MapViewMode } from '@/Map.types';
 import { Texture } from '@/Texture.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
+import TextureEditor from './TextureEditor.vue';
+
 type WheelHandler = (e: WheelEvent) => void;
 
-@Component
+@Component({
+  components: {
+    TextureEditor,
+  },
+})
 export default class Sidebar extends Vue {
   @Prop() activeTool!: Tool;
   @Prop() activeTexture!: string;
@@ -135,6 +141,10 @@ export default class Sidebar extends Vue {
     } else {
       this.setTexture(this.textures[currentIndex - 1]);
     }
+  }
+
+  newTexture(): void {
+    this.editingTexture = '';
   }
 
   editTexture(texture: string): void {
