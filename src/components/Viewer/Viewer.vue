@@ -10,7 +10,15 @@
                 v-for="(tile, c) in row"
                 :key="`${r},${c}`"
               >
-                <div v-for="face in tile.faces" :key="`viewer_${r},${c},${face}`" :class="`face ${face} texture__${tile[face]}`"></div>
+                <template v-for="face in tile.faces">
+                  <transition name="hide" :key="`viewer_transition_${r},${c},${face}`">
+                    <div
+                      v-if="!tile.hide && tile.fade !== face"
+                      :key="`viewer_${r},${c},${face}`"
+                      :class="`face ${face} texture__${tile[face]}`"
+                    ></div>
+                  </transition>
+                </template>
               </div>
             </div>
           </div>
@@ -26,23 +34,38 @@
 </template>
 
 <script lang="ts">
-import { Map, Row } from "@/Map.types";
+import { Map, Tile } from "@/Map.types";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
-import { createEmptyTile } from '@/util';
 
 type Facing = 'north' | 'east' | 'south' | 'west';
-const directions: Facing[] = ['north', 'east', 'south', 'west'];
+
+interface TileWithFade extends Tile {
+  fade?: Facing;
+  hide?: boolean;
+}
+
+type RowWithFade = TileWithFade[];
 
 @Component
 export default class Sidebar extends Vue {
   @Prop() map!: Map;
   @Prop() show!: boolean;
-  facing: Facing = 'north';
   angle = 0;
   x = 0;
   y = 0;
 
-  get viewMap(): Row[] {
+  get facing(): Facing {
+    const baseAngle = ((this.angle % 360) + 360) % 360;
+    switch (baseAngle) {
+      case 0: return 'north';
+      case 90: return 'west';
+      case 180: return 'south';
+      case 270: return 'east';
+    }
+    return 'north';
+  }
+
+  get viewMap(): RowWithFade[] {
     const facing = this?.facing || 'north';
     const rows = this.map?.rows || [];
     const { x, y } = this;
@@ -51,20 +74,20 @@ export default class Sidebar extends Vue {
       return row.map((tile) => {
         switch (facing) {
           case 'north':
-            if (tile.y > y) return createEmptyTile(tile.x, tile.y);
-            else if (tile.y === y) return { ...tile, south: '' };
+            if (tile.y > y) return { ...tile, hide: true };
+            else if (tile.y === y) return { ...tile, fade: 'south' };
             else return { ...tile };
           case 'east':
-            if (tile.x < x) return createEmptyTile(tile.x, tile.y);
-            else if (tile.x === x) return { ...tile, west: '' };
+            if (tile.x < x) return { ...tile, hide: true };
+            else if (tile.x === x) return { ...tile, fade: 'west' };
             else return { ...tile };
           case 'south':
-            if (tile.y < y) return createEmptyTile(tile.x, tile.y);
-            else if (tile.y === y) return { ...tile, north: '' };
+            if (tile.y < y) return { ...tile, hide: true };
+            else if (tile.y === y) return { ...tile, fade: 'north' };
             else return { ...tile };
           case 'west':
-            if (tile.x > x) return createEmptyTile(tile.x, tile.y);
-            else if (tile.x === x) return { ...tile, east: '' };
+            if (tile.x > x) return { ...tile, hide: true };
+            else if (tile.x === x) return { ...tile, fade: 'east' };
             else return { ...tile };
           default:
             return { ...tile };
@@ -110,15 +133,10 @@ export default class Sidebar extends Vue {
   }
 
   rotateRight(): void {
-    const nextFacingIndex = (directions.indexOf(this.facing) + 1) % directions.length;
-    this.facing = directions[nextFacingIndex];
     this.angle -= 90;
   }
 
   rotateLeft(): void {
-    const currentFacingIndex = directions.indexOf(this.facing);
-    const nextFacingIndex = currentFacingIndex === 0 ? directions.length - 1 : currentFacingIndex - 1;
-    this.facing = directions[nextFacingIndex];
     this.angle += 90;
   }
 
@@ -228,6 +246,10 @@ export default class Sidebar extends Vue {
   max-width: var(--viewportSize);
   max-height: var(--viewportSize);
   position: relative;
+
+  .face {
+    // transition: opacity .5s ease-in-out;
+  }
 }
 
 .controls {
@@ -326,5 +348,12 @@ export default class Sidebar extends Vue {
       }
     }
   }
+}
+
+.hide-enter-active, .hide-leave-active {
+  transition: opacity .5s;
+}
+.hide-enter, .hide-leave-to {
+  opacity: 0;
 }
 </style>
