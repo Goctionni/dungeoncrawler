@@ -2,7 +2,12 @@
   <div class="viewer" v-if="show">
     <div class="viewport">
       <div class="tilt">
-        <div class="player" :class="`facing-${facing}`" :style="`transform: rotateZ(${angle}deg);`">
+        <div
+          class="player"
+          :class="{ [`facing-${facing}`]: true, ['action-transition']: action, ['transition-' + action]: action }"
+          :style="`transform: rotateZ(${angle}deg);`"
+          @transitionend="onTransitionEnd()"
+        >
           <div class="map">
             <div class="row" v-for="(row, r) in viewMap" :key="r">
               <div
@@ -11,13 +16,10 @@
                 :key="`${r},${c}`"
               >
                 <template v-for="face in tile.faces">
-                  <transition name="hide" :key="`viewer_transition_${r},${c},${face}`">
-                    <div
-                      v-if="!tile.hide && tile.fade !== face"
-                      :key="`viewer_${r},${c},${face}`"
-                      :class="`face ${face} texture__${tile[face]}`"
-                    ></div>
-                  </transition>
+                  <div
+                    :key="`viewer_${r},${c},${face}`"
+                    :class="`face ${face} texture__${tile[face]}`"
+                  ></div>
                 </template>
               </div>
             </div>
@@ -34,71 +36,69 @@
 </template>
 
 <script lang="ts">
-import { Map, Tile } from "@/Map.types";
+import { Map, Row, Tile } from "@/Map.types";
 import { createEmptyTile } from "@/util";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
 type Facing = 'north' | 'east' | 'south' | 'west';
-
-interface TileWithFade extends Tile {
-  fade?: Facing;
-  hide?: boolean;
-}
-
-type RowWithFade = TileWithFade[];
+type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;
 
 @Component
 export default class Sidebar extends Vue {
   @Prop() map!: Map;
   @Prop() show!: boolean;
+  action: Action = null;
   angle = 0;
   x = 0;
   y = 0;
 
   get facing(): Facing {
-    const baseAngle = ((this.angle % 360) + 360) % 360;
-    switch (baseAngle) {
-      case 0: return 'north';
-      case 90: return 'west';
-      case 180: return 'south';
-      case 270: return 'east';
-    }
-    return 'north';
+    return this.getFacingForAngle(this.angle);
   }
 
-  get viewMap(): RowWithFade[] {
+  get viewMap(): Row[] {
     const facing = this?.facing || 'north';
     const rows = this.map?.rows || [];
-    const { x, y } = this;
+    // When moving we change these to only cull stuff afterwards
+    let { x, y } = this;
+    // when rotation, we want to know where we were looking before
+    let wasFacing = facing;
+
+    if (this.action === 'go-forwards') {
+      if (facing === 'north') y++;
+      if (facing === 'south') y--;
+      if (facing === 'east') x--;
+      if (facing === 'west') x++;
+    } else if (this.action === 'turn-left') {
+      wasFacing = this.getFacingForAngle(this.angle - 90);
+    } else if (this.action === 'turn-right') {
+      wasFacing = this.getFacingForAngle(this.angle + 90);
+    }
+
 
     return rows.map((row) => {
       return row.map((tile) => {
-        switch (facing) {
-          case 'north':
-            if (tile.y - y > 2) return createEmptyTile(tile.x, tile.y);
-            else if (tile.y > y) return { ...tile, hide: true };
-            else if (tile.y === y) return { ...tile, fade: 'south' };
-            else return tile;
-          case 'east':
-            if (x - tile.x > 2) return createEmptyTile(tile.x, tile.y);
-            if (tile.x < x) return { ...tile, hide: true };
-            else if (tile.x === x) return { ...tile, fade: 'west' };
-            else return tile;
-          case 'south':
-            if (y - tile.y > 2) return createEmptyTile(tile.x, tile.y);
-            if (tile.y < y) return { ...tile, hide: true };
-            else if (tile.y === y) return { ...tile, fade: 'north' };
-            else return tile;
-          case 'west':
-            if (tile.x - x > 2) return createEmptyTile(tile.x, tile.y);
-            if (tile.x > x) return { ...tile, hide: true };
-            else if (tile.x === x) return { ...tile, fade: 'east' };
-            else return tile;
-          default:
-            return tile;
-        }
+        let shouldHide = true;
+        const facedDirections = [wasFacing, facing];
+        if (facedDirections.includes('north') && tile.y <= y) shouldHide = false;
+        if (facedDirections.includes('south') && tile.y >= y) shouldHide = false;
+        if (facedDirections.includes('east') && tile.x >= x) shouldHide = false;
+        if (facedDirections.includes('west') && tile.x <= x) shouldHide = false;
+
+        return shouldHide ? createEmptyTile(tile.x, tile.y) : tile;
       });
     });
+  }
+
+  @Watch('viewMap')
+  logNumNonEmptyTiles(rows: Row[]): void {
+    let numNonEmptyTiles = 0;
+    for (const row of rows) {
+      for (const tile of row) {
+        if (tile.faces.length) numNonEmptyTiles++;
+      }
+    }
+    console.log('numNonEmptyTiles', numNonEmptyTiles);
   }
 
   get viewXOffset(): number {
@@ -122,6 +122,17 @@ export default class Sidebar extends Vue {
     Object.assign(window, { viewer: this });
   }
 
+  getFacingForAngle(angle: number): Facing {
+    const baseAngle = ((angle % 360) + 360) % 360;
+    switch (baseAngle) {
+      case 0: return 'north';
+      case 90: return 'west';
+      case 180: return 'south';
+      case 270: return 'east';
+    }
+    return 'north';
+  }
+
   @Watch('map.startTile', { immediate: true, deep: true })
   initStartingPosition(): void {
     const { startTile } = this.map;
@@ -137,15 +148,27 @@ export default class Sidebar extends Vue {
     (this.$el as HTMLElement).style.setProperty('--viewportYOffset', this.viewYOffset.toString());
   }
 
+  @Watch('action')
+  logAction(): void {
+    console.log(this.action || 'action complete');
+  }
+
+  onTransitionEnd(): void {
+    this.action = null;
+  }
+
   rotateRight(): void {
+    this.action = 'turn-right';
     this.angle -= 90;
   }
 
   rotateLeft(): void {
+    this.action = 'turn-left';
     this.angle += 90;
   }
 
   goForwards(): void {
+    this.action = 'go-forwards';
     switch(this.facing) {
       case 'north':
         this.y--;
@@ -253,6 +276,7 @@ export default class Sidebar extends Vue {
   position: relative;
 
   .face {
+    backface-visibility: hidden;
     // transition: opacity .5s ease-in-out;
   }
 }
@@ -353,12 +377,5 @@ export default class Sidebar extends Vue {
       }
     }
   }
-}
-
-.hide-enter-active, .hide-leave-active {
-  transition: opacity .5s;
-}
-.hide-enter, .hide-leave-to {
-  opacity: 0;
 }
 </style>
