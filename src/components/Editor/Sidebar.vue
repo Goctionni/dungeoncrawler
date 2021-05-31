@@ -49,7 +49,6 @@
         >
           <button class="edit-texture" @click.prevent.stop="editTexture(texture)">Edit</button>
           <button class="remove-texture" @click.prevent.stop="removeTexture(texture)">Remove</button>
-          {{ texture }}
         </button>
         <button
           type="button"
@@ -342,6 +341,7 @@ export default class Sidebar extends Vue {
 
     .remove-texture,
     .edit-texture {
+      display: none;
       position: absolute;
       top: 0;
       padding: 0;
@@ -362,6 +362,11 @@ export default class Sidebar extends Vue {
         outline: 0;
         text-decoration: underline;
       }
+    }
+
+    &:hover .remove-texture,
+    &:hover .edit-texture {
+      display: block;
     }
 
     .remove-texture {

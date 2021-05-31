@@ -12,16 +12,16 @@
     &.east {
         left: 100%;
         transform-origin: left;
-        transform: rotateY(-90deg);
+        transform: rotateY(-90deg) rotateZ(90deg) translateY(-50%) translateX(-50%);
     }
     &.south {
         top: 100%;
         transform-origin: top;
-        transform: rotateX(90deg);
+        transform: rotateX(90deg) rotateZ(180deg) translateY(-100%);
     }
     &.west {
         right: 100%;
         transform-origin: right;
-        transform: rotateY(90deg);
+        transform: rotateY(90deg) rotateZ(-90deg) translateY(-50%) translateX(50%);
     }
 }

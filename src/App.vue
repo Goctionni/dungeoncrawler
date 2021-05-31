@@ -93,6 +93,13 @@ export default class App extends Vue {
   }
 
   initDefaultTextures(): void {
+    this.textureList.push({ name: 'floor1', properties: [{ name: 'background-image', value: `url('./textures/floor_01.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]})
+    this.textureList.push({ name: 'ground', properties: [{ name: 'background-image', value: `url('./textures/GroundF.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]})
+    this.textureList.push({ name: 'wall1', properties: [{ name: 'background-image', value: `url('./textures/brks_2.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]})
+    this.textureList.push({ name: 'wall2', properties: [{ name: 'background-image', value: `url('./textures/brks_1.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]})
+    this.textureList.push({ name: 'wall3', properties: [{ name: 'background-image', value: `url('./textures/bkred_1.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]})
+    this.textureList.push({ name: 'wall4', properties: [{ name: 'background-image', value: `url('./textures/brks_8.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]})
+    this.textureList.push({ name: 'metal', properties: [{ name: 'background-image', value: `url('./textures/wall52_1.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]})
     this.textureList.push({ name: 'ph1', properties: [{ name: 'background-color', value: '#f00' }] });
     this.textureList.push({ name: 'ph2', properties: [{ name: 'background-color', value: '#0f0' }] });
     this.textureList.push({ name: 'ph3', properties: [{ name: 'background-color', value: '#00f' }] });

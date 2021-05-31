@@ -266,7 +266,6 @@ export default class Sidebar extends Vue {
 }
 
 .tile {
-  border: solid #000 1px;
   width: var(--viewportSize);
   height: var(--viewportSize);
   min-width: var(--viewportSize);
