@@ -47,8 +47,8 @@ import Sidebar from './Sidebar.vue';
 export default class Editor extends Vue {
   @Prop() show!: boolean;
 
-  mapSizeX = 15;
-  mapSizeY = 9;
+  mapSizeX = 7;
+  mapSizeY = 7;
   mapViewMode: MapViewMode = 'individual';
   startTile: Tile | null = null;
   tiles: { [pos: string]: Tile } = {};
