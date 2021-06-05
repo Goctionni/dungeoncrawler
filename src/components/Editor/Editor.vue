@@ -15,13 +15,11 @@
       :mapViewMode="mapViewMode"
       :textures="textures"
       :tools="tools"
-      :mapSizeX="mapSizeX"
-      :mapSizeY="mapSizeY"
+      :mapSize="mapSize"
       @setTexture="activeTexture = $event"
       @setTool="activeTool = $event"
       @setMapViewMode="mapViewMode = $event"
-      @setMapSizeX="mapSizeX = $event"
-      @setMapSizeY="mapSizeY = $event"
+      @setMapSize="setMapSize($event)"
       @saveTexture="saveTexture($event)"
       @removeTexture="removeTextureByName($event)"
     />
@@ -32,7 +30,7 @@
 import { Texture } from '@/Texture.types';
 import { Component, Vue, Prop, Watch, InjectReactive } from 'vue-property-decorator';
 
-import { Row, Tile, Tool, tools, MapViewMode } from '@/Map.types';
+import { Row, Tile, Tool, tools, MapViewMode, ProjectDefintion, MapDefinition, StartPos, Size } from '@/Map.types';
 import { createEmptyTile } from '@/util';
 
 import Map from './Map.vue';
@@ -46,33 +44,59 @@ import Sidebar from './Sidebar.vue';
 })
 export default class Editor extends Vue {
   @Prop() show!: boolean;
-
-  mapSizeX = 15;
-  mapSizeY = 9;
+  @InjectReactive() project!: ProjectDefintion;
+  selectedMap = '';
   mapViewMode: MapViewMode = 'individual';
-  startTile: Tile | null = null;
-  tiles: { [pos: string]: Tile } = {};
   tools: Tool[] = tools.slice();
   activeTool: Tool = 'floor';
   activeTexture = '';
 
+  get map(): MapDefinition {
+    return this.project.maps.find((map) => map.name === this.selectedMap) || this.project.maps[0];
+  }
+
+  get mapSize(): Size {
+    return this.map.size;
+  }
+
+  set mapSize(size: Size) {
+    this.map.size = size;
+  }
+
+  get startTile(): StartPos {
+    return this.map.start;
+  }
+
+  set startTile(start: StartPos) {
+    this.map.start = start;
+  }
+
+  get tiles(): { [pos: string]: Tile }  {
+    return this.map.tiles;
+  }
+
   @InjectReactive() textureList!: Texture[];
   get textures(): string[] {
-    return this.textureList.map((texture) => texture.name);
+    return this.project.textures.map((texture) => texture.name);
   }
 
   get rows(): Row[] {
-    const { mapSizeX, mapSizeY, tiles } = this;
+    const { mapSize, tiles } = this;
     const rows: Row[] = [];
-    for (let y = 0; y < mapSizeY; y++) {
+    for (let y = 0; y < mapSize.y; y++) {
       const row: Row = [];
-      for (let x = 0; x < mapSizeX; x++) {
+      for (let x = 0; x < mapSize.x; x++) {
         let tile = tiles[`${x}:${y}`] || createEmptyTile(x, y);
         row.push(tile);
       }
       rows.push(row);
     }
     return rows;
+  }
+
+  @Watch('project', { immediate: true })
+  initSelectedMap(): void {
+    this.selectedMap = this.project.maps[0]?.name;
   }
 
   updateTile({ tile, tool }: { tile: Tile, tool: Tool }): void {
@@ -109,7 +133,7 @@ export default class Editor extends Vue {
     }
   }
 
-  setStart(startTile: Tile): void {
+  setStart(startTile: StartPos): void {
     this.startTile = startTile;
     this.emitUpdate();
   }

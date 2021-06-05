@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { Tool, MapViewMode } from '@/Map.types';
+import { Tool, MapViewMode, Size } from '@/Map.types';
 import { Texture } from '@/Texture.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
@@ -80,8 +80,7 @@ export default class Sidebar extends Vue {
   @Prop() mapViewMode!: MapViewMode;
   @Prop() tools!: Tool[];
   @Prop() textures!: string[];
-  @Prop() mapSizeX!: number;
-  @Prop() mapSizeY!: number;
+  @Prop() mapSize!: Size;
 
   editingTexture: string | null = null;
   wheelHandler: WheelHandler | null = null;
@@ -94,17 +93,19 @@ export default class Sidebar extends Vue {
   };
 
   get mapSizeXModel(): number {
-    return this.mapSizeX;
+    return this.mapSize.x;
   }
-  set mapSizeXModel(n: number) {
-    this.$emit('setMapSizeX', n);
+  set mapSizeXModel(x: number) {
+    const newSize: Size = { ...this.mapSize, x };
+    this.$emit('setMapSize', newSize);
   }
 
   get mapSizeYModel(): number {
-    return this.mapSizeY;
+    return this.mapSize.y;
   }
-  set mapSizeYModel(n: number) {
-    this.$emit('setMapSizeY', n);
+  set mapSizeYModel(y: number) {
+    const newSize: Size = { ...this.mapSize, y };
+    this.$emit('setMapSize', newSize);
   }
 
   get mapViewModeModel(): MapViewMode {

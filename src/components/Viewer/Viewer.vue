@@ -36,11 +36,10 @@
 </template>
 
 <script lang="ts">
-import { Map, Row, Tile } from "@/Map.types";
+import { Facing, Map, Row } from "@/Map.types";
 import { createEmptyTile } from "@/util";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
-type Facing = 'north' | 'east' | 'south' | 'west';
 type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;
 
 @Component
