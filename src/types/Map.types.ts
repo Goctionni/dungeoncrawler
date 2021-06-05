@@ -1,4 +1,4 @@
-import { Texture } from "@/Texture.types";
+import { Texture } from "@/types/Texture.types";
 
 export const tools = ['floor', 'north', 'east', 'south', 'west'] as const;
 export type Tool = typeof tools[number];

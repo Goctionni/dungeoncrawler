@@ -1,4 +1,4 @@
-import { Tile } from "@/Map.types";
+import { Tile } from "@/types/Map.types";
 
 export const createEmptyTile = (x: number, y: number): Tile => {
     return {

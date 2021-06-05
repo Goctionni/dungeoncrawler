@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { Facing, Map, Row } from "@/Map.types";
+import { Facing, Map, Row } from "@/types/Map.types";
 import { createEmptyTile } from "@/util";
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 

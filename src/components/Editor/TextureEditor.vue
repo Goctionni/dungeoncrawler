@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { CSSProperty, Texture } from '@/Texture.types';
+import { CSSProperty, Texture } from '@/types/Texture.types';
 import { Component, Vue, Prop, InjectReactive } from 'vue-property-decorator';
 
 @Component

@@ -61,8 +61,8 @@
 </template>
 
 <script lang="ts">
-import { Tool, MapViewMode, Size } from '@/Map.types';
-import { Texture } from '@/Texture.types';
+import { Tool, MapViewMode, Size } from '@/types/Map.types';
+import { Texture } from '@/types/Texture.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 import TextureEditor from './TextureEditor.vue';

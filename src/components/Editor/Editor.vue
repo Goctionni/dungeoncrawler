@@ -1,5 +1,5 @@
 <template>
-  <div class="editor" v-if="show">
+  <div class="editor">
     <Map
       :rows="rows"
       :activeTool="activeTool"
@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
-import { Texture } from '@/Texture.types';
-import { Component, Vue, Prop, Watch, InjectReactive } from 'vue-property-decorator';
+import { Texture } from '@/types/Texture.types';
+import { Component, Vue, Watch, InjectReactive } from 'vue-property-decorator';
 
-import { Row, Tile, Tool, tools, MapViewMode, ProjectDefintion, MapDefinition, StartPos, Size } from '@/Map.types';
+import { Row, Tile, Tool, tools, MapViewMode, ProjectDefintion, MapDefinition, StartPos, Size } from '@/types/Map.types';
 import { createEmptyTile } from '@/util';
 
 import Map from './Map.vue';
@@ -43,7 +43,6 @@ import Sidebar from './Sidebar.vue';
   },
 })
 export default class Editor extends Vue {
-  @Prop() show!: boolean;
   @InjectReactive() project!: ProjectDefintion;
   selectedMap = '';
   mapViewMode: MapViewMode = 'individual';

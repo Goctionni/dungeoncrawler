@@ -12,18 +12,19 @@
         :class="{ active: state === 'viewer'}"
         @click="state = 'viewer'"
         v-text="'Viewer'"
-        :disabled="!map"
       ></button>
     </div>
+    <ProjectManager
+      v-if="state === 'project-manager'"
+      @setProject="setProject($event)"
+    />
     <Editor
-      :show="state === 'editor'"
-      @map="updateMap($event)"
+      v-if="state === 'editor'"
       key="editor"
     />
     <Viewer
       v-if="state === 'viewer'"
       :show="state === 'viewer'"
-      :map="map"
       key="viewer"
     />
   </div>
@@ -32,13 +33,13 @@
 <script lang="ts">
 import { Component, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
 
-import { Map } from '@/Map.types';
-import { Texture } from '@/Texture.types';
+import { ProjectDefintion } from '@/types/Map.types';
 
 import Editor from '@/components/Editor/Editor.vue';
 import Viewer from '@/components/Viewer/Viewer.vue';
+import ProjectManager from '@/components/ProjectManager/ProjectManager.vue';
 
-type AppState = 'editor' | 'viewer';
+type AppState = 'editor' | 'viewer' | 'project-manager';
 interface TwineDungeonCrawlerData {
   activeSave?: string;
 }
@@ -49,17 +50,16 @@ const lsPrefix = 'tdc_';
   components: {
     Editor,
     Viewer,
+    ProjectManager,
   },
 })
 export default class App extends Vue {
-  state: AppState = 'editor';
-  map: Map | null = null;
+  state: AppState = 'project-manager';
   styleElement!: HTMLStyleElement;
-
-  @ProvideReactive() textureList: Texture[] = [];
+  @ProvideReactive() project: ProjectDefintion | null = null;
 
   get textureCSS(): string {
-    return this.textureList.map((texture): string => {
+    return this.project?.textures.map((texture): string => {
       let cssBody = '';
       for (const property of texture.properties) {
         const { name, value } = property;
@@ -70,11 +70,7 @@ export default class App extends Vue {
         }
       }
       return `.texture__${texture.name} { ${cssBody} }`;
-    }).join(' ');
-  }
-
-  updateMap(map: Map): void {
-    this.map = map;
+    }).join(' ') || '';
   }
 
   initSaves(): boolean {
@@ -92,25 +88,6 @@ export default class App extends Vue {
     return true;
   }
 
-  initDefaultTextures(): void {
-    this.textureList.push(
-      { name: 'floor1', properties: [{ name: 'background-image', value: `url('./textures/floor_01.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]},
-      { name: 'ground', properties: [{ name: 'background-image', value: `url('./textures/GroundF.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]},
-      { name: 'wall1', properties: [{ name: 'background-image', value: `url('./textures/brks_2.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]},
-      { name: 'wall2', properties: [{ name: 'background-image', value: `url('./textures/brks_1.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]},
-      { name: 'wall3', properties: [{ name: 'background-image', value: `url('./textures/bkred_1.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]},
-      { name: 'wall4', properties: [{ name: 'background-image', value: `url('./textures/brks_8.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]},
-      { name: 'metal', properties: [{ name: 'background-image', value: `url('./textures/wall52_1.png')` }, { name: 'background-size', value: `contain` }, { name: 'background-repeat', value: `repeat` }]},
-      { name: 'ph1', properties: [{ name: 'background-color', value: '#f00' }] },
-      { name: 'ph2', properties: [{ name: 'background-color', value: '#0f0' }] },
-      { name: 'ph3', properties: [{ name: 'background-color', value: '#00f' }] },
-      { name: 'ph4', properties: [{ name: 'background-color', value: '#ff0' }] },
-      { name: 'ph5', properties: [{ name: 'background-color', value: '#f0f' }] },
-      { name: 'ph6', properties: [{ name: 'background-color', value: '#0ff' }] },
-      { name: 'ph7', properties: [{ name: 'background-color', value: '#999' }] },
-    )
-  }
-
   initStyleTarget(): void {
     const oldStylElements = Array.from(document.head.querySelectorAll(`style[data-tdc]`));
     while (oldStylElements.length) {
@@ -122,6 +99,11 @@ export default class App extends Vue {
     document.head.appendChild(this.styleElement);
   }
 
+  setProject(project: ProjectDefintion): void {
+    this.project = project;
+    this.state = 'editor';
+  }
+
   @Watch('textureCSS')
   updateDomTextureCSS(): void {
     this.styleElement.innerHTML = this.textureCSS;
@@ -129,9 +111,6 @@ export default class App extends Vue {
 
   created(): void {
     this.initStyleTarget();
-    if (!this.initSaves()) {
-      this.initDefaultTextures();
-    }
   }
 }
 </script>
@@ -144,7 +123,22 @@ export default class App extends Vue {
 body, html {
   padding: 0;
   margin: 0;
+  width: 100%;
+  height: 100%;
   font-family: Arial, Helvetica, sans-serif;
+}
+</style>
+
+<style lang="scss" scoped>
+.app {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+
+  > :not(.statebar) {
+    flex: 1;
+  }
 }
 
 .statebar {

@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { Row, Tile, Tool, MapViewMode } from '@/Map.types';
+import { Row, Tile, Tool, MapViewMode } from '@/types/Map.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 type KeypressHandler = (e: KeyboardEvent) => void;
