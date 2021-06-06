@@ -33,9 +33,11 @@ export interface StartPos extends Pos {
 }
 
 export interface ProjectDefintion {
+  guid: string;
   name: string;
   maps: MapDefinition[];
   textures: Texture[];
+  hasUnsavedChanges: boolean;
 }
 
 export interface MapDefinition {

@@ -5,20 +5,24 @@
             <div class="overview-list">
                 <p v-if="!projects.length">No saved projects</p>
                 <template v-else>
-                    <div
+                    <button
                         v-for="project in projects"
-                        :key="`pm_project_${project}`"
+                        :key="`pm_project_${project.guid}`"
                         class="project"
-                        :class="{ active: projectModel.toLowerCase() === project.toLowerCase() }"
-                    >
-                        {{ project }}
-                    </div>
+                        :class="{ active: projectModel.toLowerCase() === project.name.toLowerCase() }"
+                        v-text="project.name"
+                        @click="projectModel = project.name"
+                    />
                 </template>
             </div>
             <div class="overview-input">
                 <label>
                     Project name:
-                    <input v-model="projectModel" placeholder="Enter project name">
+                    <input
+                        v-model="projectModel"
+                        placeholder="Enter project name"
+                        @keydown.enter.prevent="isExistingProject ? openProject() : createNewProject()"
+                    />
                 </label>
             </div>
             <div class="overview-actions">
@@ -36,40 +40,45 @@
 import { Component, Vue } from 'vue-property-decorator';
 
 import { DEFAULT_TEXTURES } from '@/data/defaultTextures';
+import { DEFAULT_MAP_FACTORY } from '@/data/defaultMap';
 import { ProjectDefintion } from '@/types/Map.types';
+import { ProjectListItem } from '@/types/store.types';
 import { store } from '@/store';
 
 @Component
 export default class ProjectManager extends Vue {
-  projects: string[] = [];
+  projects: ProjectListItem[] = [];
   projectModel = '';
 
   get isExistingProject(): boolean {
       const { projects, projectModel } = this;
-      return projects.map((p) => p.toLowerCase()).includes(projectModel.toLowerCase());
+      return projects.map((p) => p.name.toLowerCase()).includes(projectModel.toLowerCase());
   }
 
-  createNewProject(name: string): void {
-    this.$emit('setProject', {
-      name,
-      textures: DEFAULT_TEXTURES,
+  createNewProject(): void {
+    const project: ProjectDefintion = {
+      guid: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36),
+      name: this.projectModel,
+      textures: [...DEFAULT_TEXTURES],
       maps: [{
+        ...DEFAULT_MAP_FACTORY(),
         name: 'map 1',
-        size: { x: 7, y: 7 },
-        start: { x: 3, y: 3, direction: 'north' },
-        tiles: {},
       }],
-    });
+      hasUnsavedChanges: false,
+    };
+    this.$emit('setProject', project);
   }
 
   async openProject(): Promise<void> {
-      const project = await store.getItem<ProjectDefintion>(`project__${this.projectModel}`);
+      const guid = this.projects.find((item) => item.name.toLowerCase() === this.projectModel.toLowerCase())?.guid;
+      if (!guid) return alert('Error loading project!');
+      const project = await store.getItem<ProjectDefintion>(`project__${guid}`);
       if (!project) return alert('Error loading project!');
       this.$emit('setProject', project);
   }
 
   async created(): Promise<void> {
-      this.projects = await store.getItem<string[]>('project-list') || [];
+      this.projects = await store.getItem<ProjectListItem[]>('project-list') || [];
   }
 }
 </script>
@@ -114,6 +123,26 @@ p {
         p {
             font-style: italic;
         }
+
+        .project {
+            display: block;
+            border: 0;
+            padding: .25em .5em;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 2px;
+
+            &:hover {
+                background-color: #DDD;
+            }
+
+            &.active {
+                background-color: #48B;
+                color: #FFF;
+            }
+        }
     }
 
     &-input {
@@ -149,6 +178,7 @@ p {
             cursor: pointer;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             transition: background-color .2s ease-in-out;
+            min-height: 32px;
 
             &:hover {
                 background: #DDD;
@@ -156,10 +186,14 @@ p {
         }
 
         .message {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
             color: #999;
             font-size: 14px;
             font-style: italic;
             padding: 0 5px;
+            min-height: 32px;
         }
     }
 }

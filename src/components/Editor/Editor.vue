@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { Texture } from '@/types/Texture.types';
-import { Component, Vue, Watch, InjectReactive } from 'vue-property-decorator';
+import { Component, Vue, InjectReactive } from 'vue-property-decorator';
 
 import { Row, Tile, Tool, tools, MapViewMode, ProjectDefintion, MapDefinition, StartPos, Size } from '@/types/Map.types';
 import { createEmptyTile } from '@/util';
@@ -44,14 +44,16 @@ import Sidebar from './Sidebar.vue';
 })
 export default class Editor extends Vue {
   @InjectReactive() project!: ProjectDefintion;
-  selectedMap = '';
+  @InjectReactive() selectedMap!: string;
+
   mapViewMode: MapViewMode = 'individual';
   tools: Tool[] = tools.slice();
   activeTool: Tool = 'floor';
   activeTexture = '';
 
   get map(): MapDefinition {
-    return this.project.maps.find((map) => map.name === this.selectedMap) || this.project.maps[0];
+    const { project, selectedMap } = this;
+    return project.maps.find((map) => map.name === selectedMap) || project.maps[0];
   }
 
   get mapSize(): Size {
@@ -60,6 +62,7 @@ export default class Editor extends Vue {
 
   set mapSize(size: Size) {
     this.map.size = size;
+    this.project.hasUnsavedChanges = true;
   }
 
   get startTile(): StartPos {
@@ -68,13 +71,17 @@ export default class Editor extends Vue {
 
   set startTile(start: StartPos) {
     this.map.start = start;
+    this.project.hasUnsavedChanges = true;
   }
 
   get tiles(): { [pos: string]: Tile }  {
     return this.map.tiles;
   }
 
-  @InjectReactive() textureList!: Texture[];
+  get textureList(): Texture[] {
+    return this.project.textures;
+  }
+
   get textures(): string[] {
     return this.project.textures.map((texture) => texture.name);
   }
@@ -93,11 +100,6 @@ export default class Editor extends Vue {
     return rows;
   }
 
-  @Watch('project', { immediate: true })
-  initSelectedMap(): void {
-    this.selectedMap = this.project.maps[0]?.name;
-  }
-
   updateTile({ tile, tool }: { tile: Tile, tool: Tool }): void {
     const {x, y} = tile;
     const pos = `${x}:${y}`;
@@ -114,6 +116,7 @@ export default class Editor extends Vue {
     } else {
       this.$delete(this.tiles, pos);
     }
+    this.project.hasUnsavedChanges = true;
   }
 
   saveTexture({ oldName, texture }: { oldName: string, texture: Texture }): void {
@@ -123,6 +126,7 @@ export default class Editor extends Vue {
     } else {
       Object.assign(obj, texture);
     }
+    this.project.hasUnsavedChanges = true;
   }
 
   removeTextureByName(name: string): void {
@@ -130,16 +134,17 @@ export default class Editor extends Vue {
     if (index >= 0) {
       this.textureList.splice(index, 1);
     }
+    this.project.hasUnsavedChanges = true;
   }
 
   setStart(startTile: StartPos): void {
     this.startTile = startTile;
-    this.emitUpdate();
+    this.project.hasUnsavedChanges = true;
   }
 
-  @Watch('rows')
-  emitUpdate(): void {
-    this.$emit('map', { rows: this.rows, startTile: this.startTile });
+  setMapSize(size: Size): void {
+    this.mapSize = size;
+    this.project.hasUnsavedChanges = true;
   }
 }
 </script>

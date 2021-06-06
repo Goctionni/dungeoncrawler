@@ -1,22 +1,33 @@
 <template>
   <div class="app">
-    <div class="statebar">
-      <button
-        type="button"
-        :class="{ active: state === 'editor'}"
-        @click="state = 'editor'"
-        v-text="'Editor'"
-      ></button>
-      <button
-        type="button"
-        :class="{ active: state === 'viewer'}"
-        @click="state = 'viewer'"
-        v-text="'Viewer'"
-      ></button>
+    <div class="appbar">
+      <h1>Twine Dungeon Crawler System</h1>
+      <template v-if="state !== 'project-manager'">
+        <button
+          type="button"
+          :class="{ active: state === 'editor'}"
+          @click="state = 'editor'"
+          v-text="'Editor'"
+        />
+        <button
+          type="button"
+          :class="{ active: state === 'viewer'}"
+          @click="state = 'viewer'"
+          v-text="'Viewer'"
+        />
+        <span class="separator"></span>
+        <button v-if="project.hasUnsavedChanges" @click="saveProject()">Save changes</button>
+        <button @click="closeProject()" class="close" title="Close project">&times;</button>
+      </template>
     </div>
     <ProjectManager
       v-if="state === 'project-manager'"
       @setProject="setProject($event)"
+    />
+    <MapPicker
+      class="map-picker"
+      v-if="state !== 'project-manager'"
+      @setMap="setMap($event)"
     />
     <Editor
       v-if="state === 'editor'"
@@ -38,6 +49,9 @@ import { ProjectDefintion } from '@/types/Map.types';
 import Editor from '@/components/Editor/Editor.vue';
 import Viewer from '@/components/Viewer/Viewer.vue';
 import ProjectManager from '@/components/ProjectManager/ProjectManager.vue';
+import MapPicker from '@/components/MapPicker/MapPicker.vue';
+import { store } from './store';
+import { ProjectListItem } from './types/store.types';
 
 type AppState = 'editor' | 'viewer' | 'project-manager';
 interface TwineDungeonCrawlerData {
@@ -51,12 +65,14 @@ const lsPrefix = 'tdc_';
     Editor,
     Viewer,
     ProjectManager,
+    MapPicker,
   },
 })
 export default class App extends Vue {
   state: AppState = 'project-manager';
   styleElement!: HTMLStyleElement;
   @ProvideReactive() project: ProjectDefintion | null = null;
+  @ProvideReactive() selectedMap = '';
 
   get textureCSS(): string {
     return this.project?.textures.map((texture): string => {
@@ -71,6 +87,11 @@ export default class App extends Vue {
       }
       return `.texture__${texture.name} { ${cssBody} }`;
     }).join(' ') || '';
+  }
+
+  @Watch('project', { immediate: true })
+  initDefaultMap(): void {
+    this.selectedMap = this.project?.maps[0].name || '';
   }
 
   initSaves(): boolean {
@@ -99,6 +120,10 @@ export default class App extends Vue {
     document.head.appendChild(this.styleElement);
   }
 
+  setMap(mapname: string): void {
+    this.selectedMap = mapname;
+  }
+
   setProject(project: ProjectDefintion): void {
     this.project = project;
     this.state = 'editor';
@@ -107,6 +132,20 @@ export default class App extends Vue {
   @Watch('textureCSS')
   updateDomTextureCSS(): void {
     this.styleElement.innerHTML = this.textureCSS;
+  }
+
+  async saveProject(): Promise<void> {
+    if (!this.project) return;
+    const projectnames = await store.getItem<ProjectListItem[]>('project-list') || [];
+    const filtered = projectnames.filter((pn) => pn.guid !== this.project?.guid);
+    this.project.hasUnsavedChanges = false;
+    store.setItem(`project-list`, [{ name: this.project.name, guid: this.project.guid }, ...filtered]);
+    store.setItem(`project__${this.project.guid}`, this.project);
+  }
+
+  closeProject(): void {
+    this.project = null;
+    this.state = 'project-manager';
   }
 
   created(): void {
@@ -136,16 +175,22 @@ body, html {
   height: 100%;
   flex-direction: column;
 
-  > :not(.statebar) {
+  > :not(.appbar, .map-picker) {
     flex: 1;
   }
 }
 
-.statebar {
+.appbar {
   background-color: #B00B13;
   display: flex;
   gap: 5px;
   padding: .25em 1em;
+
+  h1 {
+    color: #FFF;
+    font-size: 24px;
+    margin-right: 1em;
+  }
 
   button {
     padding: .4em 1em;
@@ -168,6 +213,18 @@ body, html {
       pointer-events: none;
       opacity: .5;
     }
+  }
+
+  .separator {
+    flex: 1;
+  }
+
+  .close {
+    display: flex;
+    font-size: 24px;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
   }
 }
 </style>

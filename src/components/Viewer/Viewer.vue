@@ -46,7 +46,7 @@ type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;
 @Component
 export default class Sidebar extends Vue {
   @InjectReactive() project!: ProjectDefintion;
-  selectedMap = '';
+  @InjectReactive() selectedMap!: string;
 
   get map(): MapDefinition {
     const { project, selectedMap } = this;
@@ -125,11 +125,6 @@ export default class Sidebar extends Vue {
     const { x, y } = this;
     const tile = rows[y][x];
     return !tile[facing];
-  }
-
-  @Watch('project', { immediate: true })
-  initProject(): void {
-    this.selectedMap = this.project.maps[0]?.name || '';
   }
 
   mounted(): void {

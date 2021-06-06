@@ -30,16 +30,21 @@
 </template>
 
 <script lang="ts">
+import { ProjectDefintion } from '@/types/Map.types';
 import { CSSProperty, Texture } from '@/types/Texture.types';
 import { Component, Vue, Prop, InjectReactive } from 'vue-property-decorator';
 
 @Component
 export default class TextureEditor extends Vue {
     @Prop() textureName!: string;
-    @InjectReactive() textureList!: Texture[];
+    @InjectReactive() project!: ProjectDefintion;
     nameModel = '';
     error = '';
     properties: CSSProperty[] = [];
+
+    get textureList(): Texture[] {
+        return this.project.textures;
+    }
 
     get titleText(): string {
         return this.textureName ? `Edit ${this.textureName}` : 'New texture';
