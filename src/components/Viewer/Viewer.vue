@@ -1,5 +1,5 @@
 <template>
-  <div class="viewer" v-if="show">
+  <div class="viewer">
     <div class="viewport">
       <div class="tilt">
         <div
@@ -36,16 +36,38 @@
 </template>
 
 <script lang="ts">
-import { Facing, Map, Row } from "@/types/Map.types";
+import { MapDefinition, ProjectDefintion } from "@/types/Map.types";
+import { Facing, Row } from "@/types/Map.types";
 import { createEmptyTile } from "@/util";
-import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import { Component, Vue, Watch, InjectReactive } from "vue-property-decorator";
 
 type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;
 
 @Component
 export default class Sidebar extends Vue {
-  @Prop() map!: Map;
-  @Prop() show!: boolean;
+  @InjectReactive() project!: ProjectDefintion;
+  selectedMap = '';
+
+  get map(): MapDefinition {
+    const { project, selectedMap } = this;
+    return project.maps.find((map) => map.name === selectedMap) || project.maps[0];
+  }
+
+  get rows(): Row[] {
+    const { map } = this;
+    const rows: Row[] = [];
+    for (let y = 0; y < map.size.y; y++) {
+      const row: Row = [];
+      rows.push(row);
+      for (let x = 0; x < map.size.x; x++) {
+        const key = `${x}:${y}`;
+        const tile = map.tiles[key] || createEmptyTile(x, y);
+        row.push(tile);
+      }
+    }
+    return rows;
+  }
+
   action: Action = null;
   angle = 0;
   x = 0;
@@ -57,7 +79,7 @@ export default class Sidebar extends Vue {
 
   get viewMap(): Row[] {
     const facing = this?.facing || 'north';
-    const rows = this.map?.rows || [];
+    const rows = this.rows || [];
     // When moving we change these to only cull stuff afterwards
     let { x, y } = this;
     // when rotation, we want to know where we were looking before
@@ -89,17 +111,6 @@ export default class Sidebar extends Vue {
     });
   }
 
-  @Watch('viewMap')
-  logNumNonEmptyTiles(rows: Row[]): void {
-    let numNonEmptyTiles = 0;
-    for (const row of rows) {
-      for (const tile of row) {
-        if (tile.faces.length) numNonEmptyTiles++;
-      }
-    }
-    console.log('numNonEmptyTiles', numNonEmptyTiles);
-  }
-
   get viewXOffset(): number {
     return this.x;
   }
@@ -110,10 +121,15 @@ export default class Sidebar extends Vue {
 
   get canMoveForwards(): boolean {
     const facing = this?.facing || 'north';
-    const rows = this.map?.rows || [];
+    const rows = this.rows || [];
     const { x, y } = this;
     const tile = rows[y][x];
     return !tile[facing];
+  }
+
+  @Watch('project', { immediate: true })
+  initProject(): void {
+    this.selectedMap = this.project.maps[0]?.name || '';
   }
 
   mounted(): void {
@@ -132,11 +148,11 @@ export default class Sidebar extends Vue {
     return 'north';
   }
 
-  @Watch('map.startTile', { immediate: true, deep: true })
+  @Watch('map.start', { immediate: true, deep: true })
   initStartingPosition(): void {
-    const { startTile } = this.map;
-    this.x = startTile.x;
-    this.y = startTile.y;
+    const { start } = this.map
+    this.x = start.x;
+    this.y = start.y;
   }
 
   @Watch('viewXOffset')
