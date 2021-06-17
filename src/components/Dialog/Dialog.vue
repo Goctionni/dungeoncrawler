@@ -1,6 +1,6 @@
 <template>
     <div class="backdrop">
-        <div class="dialog">
+        <div class="dialog" tabindex="-1" ref="dialogEl">
             <div class="dialog-title">
                 {{ title }}
             </div>
@@ -20,6 +20,27 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 @Component
 export default class Dialog extends Vue {
     @Prop() title!: string;
+    captureFocus!: () => void;
+    bodyScroll!: number;
+
+    mounted(): void {
+        this.bodyScroll = document.body.scrollTop;
+        if (this.$refs.dialogEl instanceof HTMLElement) {
+            const dialogEl: HTMLElement = this.$refs.dialogEl;
+            this.captureFocus = () => {
+                if (dialogEl !== document.activeElement && !dialogEl.contains(document.activeElement)) {
+                    dialogEl.focus();
+                    document.body.scrollTop = this.bodyScroll;
+                }
+            }
+            this.captureFocus();
+            document.body.addEventListener('focusin', this.captureFocus);
+        }
+    }
+
+    beforeDestroy(): void {
+        document.body.removeEventListener('focusin', this.captureFocus);
+    }
 }
 </script>
 
@@ -31,6 +52,7 @@ export default class Dialog extends Vue {
     align-items: center;
     justify-content: center;
     background-color: rgba(150, 150, 150, .5);
+    z-index: 1;
 }
 
 .dialog {

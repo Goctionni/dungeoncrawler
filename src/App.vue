@@ -27,6 +27,7 @@
     <MapPicker
       class="map-picker"
       v-if="state !== 'project-manager'"
+      :state="state"
       @setMap="setMap($event)"
     />
     <Editor
@@ -165,6 +166,13 @@ body, html {
   width: 100%;
   height: 100%;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+html {
+  overflow: hidden;
+}
+body {
+  overflow: auto;
 }
 </style>
 

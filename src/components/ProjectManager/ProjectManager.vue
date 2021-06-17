@@ -12,6 +12,7 @@
                         :class="{ active: projectModel.toLowerCase() === project.name.toLowerCase() }"
                         v-text="project.name"
                         @click="projectModel = project.name"
+                        @dblclick="projectName = project.name; openProject();"
                     />
                 </template>
             </div>

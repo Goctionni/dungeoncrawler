@@ -1,5 +1,6 @@
 # v1
 - create standalone viewer
+- wad keybinding voor viewer
 - create script that adds map to setup
 - create macro that uses the standalone viewer script at given position
 - create script that poops everything out as zip

@@ -1,7 +1,7 @@
 <template>
     <Dialog :title="title">
         {{ message }}
-        <input v-model="model">
+        <input v-model="model" @keydown.enter="$emit('btn', model)">
         <template v-slot:actions>
             <button type="button" @click="$emit('btn', false)">Cancel</button>
             <button type="button" class="primary" @click="$emit('btn', model)">Ok</button>
