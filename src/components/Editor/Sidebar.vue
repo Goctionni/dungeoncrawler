@@ -124,7 +124,6 @@ export default class Sidebar extends Vue {
   }
 
   nextTexture(): void {
-    console.log('nextTexture');
     const currentIndex = this.textures.indexOf(this.activeTexture);
     if ((currentIndex + 1) >= this.textures.length) {
       this.setTexture(this.textures[0]);
@@ -134,7 +133,6 @@ export default class Sidebar extends Vue {
   }
 
   lastTexture(): void {
-    console.log('lastTexture');
     const currentIndex = this.textures.indexOf(this.activeTexture);
     if ((currentIndex - 1) < 0) {
       this.setTexture(this.textures.slice().pop() as Tool);

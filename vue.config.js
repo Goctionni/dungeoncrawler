@@ -12,22 +12,30 @@ module.exports = {
     },
     ...(() => {
         // Editor
-        if (!process.env.BUILD_VIEWER) return {
-            outputDir: './dist/editor',
-        };
-        // VIEWER
-        return {
-            outputDir: './dist/viewer',
-            productionSourceMap: false,
-            css: {
-                extract: false,
-            },
-            configureWebpack: {
-                optimization: {
-                    splitChunks: false,
+        if (process.env.GH_BUILD) {
+            return {
+                outputDir: './dist/editor',
+                publicPath: '/dungeoncrawler/',
+            }
+        }
+        if (process.env.BUILD_VIEWER) {
+            // VIEWER
+            return {
+                outputDir: './dist/viewer',
+                productionSourceMap: false,
+                css: {
+                    extract: false,
+                },
+                configureWebpack: {
+                    optimization: {
+                        splitChunks: false,
+                    }
                 }
             }
-
         }
+        // Normal build
+        return {
+            outputDir: './dist/editor',
+        };        
     })(),
 }
