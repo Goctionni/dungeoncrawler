@@ -3,6 +3,5 @@ import App from './App.vue'
 
 Vue.config.productionTip = false
 
-new Vue({
-  render: h => h(App)
-}).$mount('#app')
+const instance = new App({ propsData: { test: 1 } }).$mount('#app');
+Object.assign(window, { instance });

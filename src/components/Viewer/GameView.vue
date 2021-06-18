@@ -145,6 +145,13 @@ export default class Sidebar extends Vue {
     this.angle += 90;
   }
 
+  @Watch('action')
+  emitActionComplete(newAction: Action, oldAction: Action): void {
+    if (newAction === null && oldAction) {
+      this.$emit('actionComplete', oldAction);
+    }
+  }
+
   @Watch('x')
   @Watch('y')
   setForwardsAction(): void {

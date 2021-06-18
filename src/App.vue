@@ -39,11 +39,12 @@
       :show="state === 'viewer'"
       key="viewer"
     />
+    {{ test }}
   </div>
 </template>
 
 <script lang="ts">
-import { Component, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
 
 import { ProjectDefintion } from '@/types/Map.types';
 
@@ -74,6 +75,7 @@ export default class App extends Vue {
   styleElement!: HTMLStyleElement;
   @ProvideReactive() project: ProjectDefintion | null = null;
   @ProvideReactive() selectedMap = '';
+  @Prop() test!: number;
 
   get textureCSS(): string {
     return this.project?.textures.map((texture): string => {
