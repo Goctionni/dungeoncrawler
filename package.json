@@ -7,7 +7,9 @@
     "build": "vue-cli-service build",
     "build:viewer": "cross-env BUILD_VIEWER=true vue-cli-service build",
     "watch": "vue-cli-service build --watch",
-    "host": "http-server ./dist",
+    "deploy:editor": "cross-env npm run build && gh-pages -d dist/editor -b gh-pages",
+    "deploy:viewer": "cross-env npm run build:viewer && gh-pages -d dist/viewer -b viewerjs",
+    "deploy": "cross-env npm run deploy:editor && npm run deploy:viewer",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -28,6 +30,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "gh-pages": "^3.2.2",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
     "typescript": "~4.1.5",
