@@ -8,8 +8,8 @@
     "build:viewer": "cross-env BUILD_VIEWER=true vue-cli-service build",
     "gh-build:editor": "cross-env GH_BUILD=true vue-cli-service build",
     "watch": "vue-cli-service build --watch",
-    "deploy:editor": "cross-env npm run gh-build:editor && gh-pages -d dist/editor -b gh-pages",
-    "deploy:viewer": "cross-env npm run build:viewer && gh-pages -d dist/viewer -b viewerjs",
+    "deploy:editor": "cross-env npm run gh-build:editor && gh-pages -d dist/editor -b gh-pages -f",
+    "deploy:viewer": "cross-env npm run build:viewer && gh-pages -d dist/viewer -b viewerjs -f",
     "deploy": "cross-env npm run deploy:editor && npm run deploy:viewer",
     "lint": "vue-cli-service lint"
   },
