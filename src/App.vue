@@ -160,7 +160,7 @@ export default class App extends Vue {
 
     // maps
     const maps: MapsData = this.project.maps.reduce((acc: MapsData, cur: MapDefinition): MapsData => ({ ...acc, [cur.name]: cur }), {});
-    const setupScript = `setup.tdc = { maps: ${JSON.stringify(maps)} };`;
+    const setupScript = `setup.tdc = { viewportSize: '800px', maps: ${JSON.stringify(maps)} };\n`;
     zip.file('tdc/tdc-setup.js', setupScript);
 
     // textures

@@ -32,6 +32,7 @@
 import { MapDefinition } from "@/types/Map.types";
 import { Facing, Row } from "@/types/Map.types";
 import { createEmptyTile } from "@/util";
+import { leftFrom, rightFrom } from "@/util/helper";
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;
@@ -64,21 +65,22 @@ export default class Sidebar extends Vue {
 
   get viewMap(): Row[] {
     const facing = this?.facing || 'north';
+    const { action } = this;
     const rows = this.rows || [];
     // When moving we change these to only cull stuff afterwards
     let { x, y } = this;
     // when rotation, we want to know where we were looking before
     let wasFacing = facing;
 
-    if (this.action === 'go-forwards') {
+    if (action === 'go-forwards') {
       if (facing === 'north') y++;
       if (facing === 'south') y--;
       if (facing === 'east') x--;
       if (facing === 'west') x++;
-    } else if (this.action === 'turn-right') {
-      wasFacing = this.getFacingForAngle(this.angle - 90);
-    } else if (this.action === 'turn-left') {
-      wasFacing = this.getFacingForAngle(this.angle + 90);
+    } else if (action === 'turn-right') {
+      wasFacing = leftFrom(facing);
+    } else if (action === 'turn-left') {
+      wasFacing = rightFrom(facing);
     }
 
     return rows.map((row) => {
@@ -90,12 +92,13 @@ export default class Sidebar extends Vue {
         if (facedDirections.includes('east') && tile.x >= x) shouldHide = false;
         if (facedDirections.includes('west') && tile.x <= x) shouldHide = false;
 
-        return shouldHide ? createEmptyTile(tile.x, tile.y) : tile;
+        return shouldHide ? tile : tile;
       });
     });
   }
 
   mounted(): void {
+    Object.assign(window, { gameview: this });
     this.updateCSSVariables();
   }
 
@@ -130,7 +133,7 @@ export default class Sidebar extends Vue {
       }
     }
     // Fallback just in case
-    this.angle = newIndex * 90;
+    this.angle = 360 - (newIndex * 90);
   }
 
   turnLeft(): void {

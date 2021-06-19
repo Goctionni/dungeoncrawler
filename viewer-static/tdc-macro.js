@@ -7,10 +7,11 @@ Macro.add('DungeonCrawler', {
         let x = this.args[1] ?? map.start.x;
         let y = this.args[2] ?? map.start.y;
         let facing = this.args[3] ?? map.start.direction;
+        let size = this.args[4] ?? setup.tdc.viewportSize ?? '800px';
 
         // Create GameView
         const viewContainer = document.createElement('div');
-        viewContainer.style.setProperty('--viewportSize', size || setup.viewportSize || '800px');
+        viewContainer.style.setProperty('--viewportSize', size);
         this.output.appendChild(viewContainer);
         const gameView = tdc.util.createView(viewContainer, map, x, y, facing);
         // Create GameControls

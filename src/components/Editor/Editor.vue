@@ -100,6 +100,10 @@ export default class Editor extends Vue {
     return rows;
   }
 
+  created(): void {
+    Object.assign(window, { GameEditor: this });
+  }
+
   updateTile({ tile, tool }: { tile: Tile, tool: Tool }): void {
     const {x, y} = tile;
     const pos = `${x}:${y}`;

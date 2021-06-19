@@ -53,6 +53,7 @@ export default class Sidebar extends Vue {
     const { start } = this.map
     this.x = start.x;
     this.y = start.y;
+    this.facing = start.direction;
   }
 
   turnRight(): void {
