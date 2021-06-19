@@ -8,6 +8,9 @@
     />
     <Controls
       :canMoveForwards="canMoveForwards"
+      @turnLeft="turnLeft()"
+      @turnRight="turnRight()"
+      @goForwards="goForwards()"
     />
   </div>
 </template>
@@ -20,10 +23,12 @@ import { Facing } from "@/types/Map.types";
 import { canMoveForwards, goTowards, leftFrom, rightFrom } from '@/util/helper';
 
 import GameView from './GameView.vue';
+import Controls from './Controls.vue';
 
 @Component({
   components: {
     GameView,
+    Controls,
   },
 })
 export default class Sidebar extends Vue {
@@ -54,11 +59,11 @@ export default class Sidebar extends Vue {
     this.y = start.y;
   }
 
-  rotateRight(): void {
+  turnRight(): void {
     this.facing = rightFrom(this.facing);
   }
 
-  rotateLeft(): void {
+  turnLeft(): void {
     this.facing = leftFrom(this.facing);
   }
 
