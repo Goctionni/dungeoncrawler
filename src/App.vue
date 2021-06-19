@@ -17,6 +17,7 @@
         />
         <span class="separator"></span>
         <button v-if="project.hasUnsavedChanges" @click="saveProject()">Save changes</button>
+        <button v-else @click="downloadFiles()">Download files</button>
         <button @click="closeProject()" class="close" title="Close project">&times;</button>
       </template>
     </div>
@@ -46,7 +47,7 @@
 <script lang="ts">
 import { Component, Prop, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
 
-import { ProjectDefintion } from '@/types/Map.types';
+import { MapDefinition, ProjectDefintion } from '@/types/Map.types';
 
 import Editor from '@/components/Editor/Editor.vue';
 import Viewer from '@/components/Viewer/Viewer.vue';
@@ -58,6 +59,10 @@ import { ProjectListItem } from './types/store.types';
 type AppState = 'editor' | 'viewer' | 'project-manager';
 interface TwineDungeonCrawlerData {
   activeSave?: string;
+}
+
+interface MapsData {
+  [name: string]: MapDefinition;
 }
 
 const lsPrefix = 'tdc_';
@@ -144,6 +149,28 @@ export default class App extends Vue {
     this.project.hasUnsavedChanges = false;
     store.setItem(`project-list`, [{ name: this.project.name, guid: this.project.guid }, ...filtered]);
     store.setItem(`project__${this.project.guid}`, this.project);
+  }
+
+  async downloadFiles(): Promise<void> {
+    if (!this.project) return;
+
+    // collect the data
+    const maps: MapsData = this.project.maps.reduce((acc: MapsData, cur: MapDefinition): MapsData => ({ ...acc, [cur.name]: cur }), {});
+    const setupScript = `setup.tdc = { maps: ${JSON.stringify(maps)} };`;
+    const textureCSS = this.textureCSS;
+    const viewerResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/viewer.js');
+    const viewerjs = await viewerResponse.text();
+
+    // zip the data
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    zip.file('tdc/tdc-textures.css', textureCSS);
+    zip.file('tdc/tdc-setup.js', setupScript);
+    zip.file('tdc/tdc-plugin.js', viewerjs);
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    // download zip
+    const saveAs = (await import('file-saver')).saveAs;
+    saveAs(zipBlob, `tdc_${this.project.name}.zip`);
   }
 
   closeProject(): void {
