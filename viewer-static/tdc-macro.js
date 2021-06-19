@@ -25,15 +25,16 @@ Macro.add('DungeonCrawler', {
 
         gameControls.$on('goForwards', () => {
             gameControls.$destroy();
-            gameView.$on('actionComplete', (action) => {
-                if (action === 'go-forwards') {
-                    gameView.$destroy();
-                    Engine.play(`tdc-${mapName}-${x},${y}`);
-                }
-            })
             const move = tdc.util.goTowards(facing);
             gameView.x = x + move.x;
             gameView.y = y + move.y;
+
+            gameView.$on('actionComplete', (action) => {
+                if (action === 'go-forwards') {
+                    gameView.$destroy();
+                    Engine.play(`tdc-${mapName}-${x + move.x},${y + move.y}`);
+                }
+            })
         });
 
         gameControls.$on('turnRight', () => {
