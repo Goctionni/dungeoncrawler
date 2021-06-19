@@ -48,10 +48,6 @@ export default class Sidebar extends Vue {
     return canMoveForwards(this.map, this.x, this.y, this.facing);
   }
 
-  mounted(): void {
-    Object.assign(window, { viewer: this });
-  }
-
   @Watch('map.start', { immediate: true, deep: true })
   initStartingPosition(): void {
     const { start } = this.map

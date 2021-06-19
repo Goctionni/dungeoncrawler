@@ -164,26 +164,26 @@ export default class App extends Vue {
     zip.file('tdc/tdc-setup.js', setupScript);
 
     // textures
-    const textureCSS = this.textureCSS;
-    zip.file('tdc/tdc-textures.css', textureCSS);
+    zip.file('tdc/tdc-textures.css', this.textureCSS);
+    zip.file('tdc/tdc-nofade.css', `.passage.tdc { transition-property: none; }`);
 
     // viewer plugin
     const viewerResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-plugin.js');
     const viewerjs = await viewerResponse.text();
     zip.file('tdc/tdc-plugin.js', viewerjs);
 
-    // macro
-    const macroResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-macro.js');
-    const macroJs = await macroResponse.text();
-    zip.file('tdc/tdc-macro.js', macroJs);
-
+    // TDC macro
+    const tdcMacroResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-macro.js');
+    const tdcMacroJs = await tdcMacroResponse.text();
+    zip.file('tdc/tdc-macro.js', tdcMacroJs);
 
     // passages
     for(const map of this.project.maps) {
       const passages = Object.values(map.tiles).map((tile: Tile): string => {
-        return `:: tdc-${map.name}-${tile.x},${tile.y}\n\n<<DungeonCrawler '${map.name}' ${tile.x} ${tile.y} $tdcFacing>><</DungeonCrawler>>\n`;
+        return `:: tdc-${map.name} (${tile.x},${tile.y}) [tdc]\n\n<<DungeonCrawler '${map.name}' ${tile.x} ${tile.y} $tdcFacing>><</DungeonCrawler>>\n`;
       });
-      zip.file(`tdc-passages/${map.name}.tw`, passages.join('\n'));
+      const mapInitPassage = `:: tdc-${map.name} [tdc]\n\n<<DungeonCrawler '${map.name}'>><</DungeonCrawler>>\n`;
+      zip.file(`tdc-passages/${map.name}.tw`, [ mapInitPassage, ...passages].join('\n'));
     }
 
     // zip the data

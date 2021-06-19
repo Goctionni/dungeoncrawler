@@ -75,9 +75,9 @@ export default class Sidebar extends Vue {
       if (facing === 'south') y--;
       if (facing === 'east') x--;
       if (facing === 'west') x++;
-    } else if (this.action === 'turn-left') {
-      wasFacing = this.getFacingForAngle(this.angle - 90);
     } else if (this.action === 'turn-right') {
+      wasFacing = this.getFacingForAngle(this.angle - 90);
+    } else if (this.action === 'turn-left') {
       wasFacing = this.getFacingForAngle(this.angle + 90);
     }
 
@@ -97,7 +97,6 @@ export default class Sidebar extends Vue {
 
   mounted(): void {
     this.updateCSSVariables();
-    Object.assign(window, { gameview: this });
   }
 
   getFacingForAngle(angle: number): Facing {
@@ -110,7 +109,6 @@ export default class Sidebar extends Vue {
     }
     return 'north';
   }
-
 
   @Watch('facing', { immediate: true })
   updateAngle(newFacing: Facing, oldFacing: Facing): void {

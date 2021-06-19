@@ -1,13 +1,16 @@
 Macro.add('DungeonCrawler', {
     tags     : null,
     handler  : function () {
-        let [mapName, x, y, facing, size] = this.args;
+        const mapName = this.args[0];
         const map = setup.tdc.maps[mapName];
         const tdc = window.dungeoncrawler;
+        let x = this.args[1] ?? map.start.x;
+        let y = this.args[2] ?? map.start.y;
+        let facing = this.args[3] ?? map.start.direction;
 
         // Create GameView
         const viewContainer = document.createElement('div');
-        viewContainer.style.setProperty('--viewportSize', size || '800px');
+        viewContainer.style.setProperty('--viewportSize', size || setup.viewportSize || '800px');
         this.output.appendChild(viewContainer);
         const gameView = tdc.util.createView(viewContainer, map, x, y, facing);
         // Create GameControls
@@ -32,7 +35,7 @@ Macro.add('DungeonCrawler', {
             gameView.$on('actionComplete', (action) => {
                 if (action === 'go-forwards') {
                     gameView.$destroy();
-                    Engine.play(`tdc-${mapName}-${x + move.x},${y + move.y}`);
+                    Engine.play(`tdc-${mapName} (${x + move.x},${y + move.y})`);
                 }
             })
         });

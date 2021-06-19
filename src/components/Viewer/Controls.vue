@@ -13,6 +13,21 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 @Component
 export default class Sidebar extends Vue {
   @Prop() canMoveForwards!: boolean;
+  keyboardListener!: (e: KeyboardEvent) => void;
+
+  created(): void {
+    this.keyboardListener = (e: KeyboardEvent) => {
+      if (e.key === 'w') return this.$emit('goForwards');
+      if (e.key === 'a') return this.$emit('turnLeft');
+      if (e.key === 'd') return this.$emit('turnRight');
+    };
+    document.body.addEventListener('keydown', this.keyboardListener);
+  }
+
+  beforeDestroy(): void {
+    document.body.removeEventListener('keydown', this.keyboardListener);
+  }
+
 }
 </script>
 
