@@ -3,7 +3,7 @@ module.exports = {
         if (process.env.BUILD_VIEWER) {
             config.entryPoints.delete('app');
             config.entry('viewer').add('./src/viewer.ts').end();
-            config.output.filename('[name].js')
+            config.output.filename('tdc-plugin.js')
             config.plugins.delete('html');
             config.plugins.delete('preload');
             config.plugins.delete('prefetch');

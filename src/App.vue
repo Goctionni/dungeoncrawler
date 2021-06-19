@@ -47,7 +47,7 @@
 <script lang="ts">
 import { Component, Prop, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
 
-import { MapDefinition, ProjectDefintion } from '@/types/Map.types';
+import { MapDefinition, ProjectDefintion, Tile } from '@/types/Map.types';
 
 import Editor from '@/components/Editor/Editor.vue';
 import Viewer from '@/components/Viewer/Viewer.vue';
@@ -154,20 +154,41 @@ export default class App extends Vue {
   async downloadFiles(): Promise<void> {
     if (!this.project) return;
 
-    // collect the data
-    const maps: MapsData = this.project.maps.reduce((acc: MapsData, cur: MapDefinition): MapsData => ({ ...acc, [cur.name]: cur }), {});
-    const setupScript = `setup.tdc = { maps: ${JSON.stringify(maps)} };`;
-    const textureCSS = this.textureCSS;
-    const viewerResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/viewer.js');
-    const viewerjs = await viewerResponse.text();
-
-    // zip the data
+    // create zip
     const JSZip = (await import('jszip')).default;
     const zip = new JSZip();
-    zip.file('tdc/tdc-textures.css', textureCSS);
+
+    // maps
+    const maps: MapsData = this.project.maps.reduce((acc: MapsData, cur: MapDefinition): MapsData => ({ ...acc, [cur.name]: cur }), {});
+    const setupScript = `setup.tdc = { maps: ${JSON.stringify(maps)} };`;
     zip.file('tdc/tdc-setup.js', setupScript);
+
+    // textures
+    const textureCSS = this.textureCSS;
+    zip.file('tdc/tdc-textures.css', textureCSS);
+
+    // viewer plugin
+    const viewerResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-plugin.js');
+    const viewerjs = await viewerResponse.text();
     zip.file('tdc/tdc-plugin.js', viewerjs);
+
+    // macro
+    const macroResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-macro.js');
+    const macroJs = await macroResponse.text();
+    zip.file('tdc/tdc-macro.js', macroJs);
+
+
+    // passages
+    for(const map of this.project.maps) {
+      const passages = Object.values(map.tiles).map((tile: Tile): string => {
+        return `:: tdc-${map.name}-${tile.x},${tile.y}\n\n<<DungeonCrawler '${map.name}' ${tile.x} ${tile.y} $tdcFacing>><</DungeonCrawler>>\n`;
+      });
+      zip.file(`tdc-passages/${map.name}.tw`, passages.join('\n'));
+    }
+
+    // zip the data
     const zipBlob = await zip.generateAsync({ type: 'blob' });
+
     // download zip
     const saveAs = (await import('file-saver')).saveAs;
     saveAs(zipBlob, `tdc_${this.project.name}.zip`);

@@ -14,12 +14,12 @@ Object.assign(window, {
             ...helper,
             createView(container: HTMLElement, map: MapDefinition, x: number, y: number, facing: Facing): GameView {
                 const target = document.createElement('div');
-                container.appendChild(container);
+                container.appendChild(target);
                 return new GameView({ propsData: { map, x, y, facing }}).$mount(target);
             },
             createControls(container: HTMLElement, canMoveForwards: boolean): Controls {
                 const target = document.createElement('div');
-                container.appendChild(container);
+                container.appendChild(target);
                 return new Controls({ propsData: { canMoveForwards }}).$mount(target);
             }
         },

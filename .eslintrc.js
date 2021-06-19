@@ -8,6 +8,7 @@ module.exports = {
     'eslint:recommended',
     '@vue/typescript/recommended'
   ],
+  ignorePatterns: ["viewer-static/**/*.js"],
   parserOptions: {
     ecmaVersion: 2020
   },
