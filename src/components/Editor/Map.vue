@@ -65,9 +65,9 @@ export default class Map extends Vue {
     }
   }
 
-  updateTile(tile: Tile, tool?: Tool): void {
+  updateTile(tile: Tile, tool?: Tool, clear?: boolean): void {
     if (!tool) tool = this.activeTool;
-    this.$emit('updateTile', { tile, tool });
+    this.$emit('updateTile', { tile, tool, clear });
   }
 
   setStart(tile: Tile): void {
@@ -82,6 +82,11 @@ export default class Map extends Vue {
     // create handler
     this.keydownHandler = (function(this: Map, e: KeyboardEvent) {
       if (!this.hover) return;
+      if (e.key === 'W') this.updateTile(this.hover, 'north', true);
+      if (e.key === 'A') this.updateTile(this.hover, 'west', true);
+      if (e.key === 'S') this.updateTile(this.hover, 'south', true);
+      if (e.key === 'D') this.updateTile(this.hover, 'east', true);
+      if (e.key === 'F') this.updateTile(this.hover, 'floor', true);
       if (e.key === 'w') this.updateTile(this.hover, 'north');
       if (e.key === 'a') this.updateTile(this.hover, 'west');
       if (e.key === 's') this.updateTile(this.hover, 'south');

@@ -19,8 +19,14 @@ Macro.add('DungeonCrawler', {
         this.output.appendChild(controlsContainer);
         const gameControls = tdc.util.createControls(controlsContainer, tdc.util.canMoveForwards(map, x, y, facing));
 
+        let isActionBusy = false;
+        gameView.$on('actionComplete', () => {
+            isActionBusy = false;
+        });
         // Bind GameControls to GameView and passage routing
         gameControls.$on('turnLeft', () => {
+            if (isActionBusy) return;
+            isActionBusy = true;
             facing = tdc.util.leftFrom(facing);
             gameView.facing = facing;
             gameControls.canMoveForwards = tdc.util.canMoveForwards(map, x, y, facing);
@@ -28,6 +34,10 @@ Macro.add('DungeonCrawler', {
         });
 
         gameControls.$on('goForwards', () => {
+            if (isActionBusy || !tdc.util.canMoveForwards(map, x, y, facing)) {
+                return;
+            }
+            isActionBusy = true;
             gameControls.$destroy();
             const move = tdc.util.goTowards(facing);
             gameView.x = x + move.x;
@@ -42,6 +52,8 @@ Macro.add('DungeonCrawler', {
         });
 
         gameControls.$on('turnRight', () => {
+            if (isActionBusy) return;
+            isActionBusy = true;
             facing = tdc.util.rightFrom(facing);
             gameView.facing = facing;
             gameControls.canMoveForwards = tdc.util.canMoveForwards(map, x, y, facing);

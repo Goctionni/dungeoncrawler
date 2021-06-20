@@ -5,6 +5,7 @@
       :x="x"
       :y="y"
       :facing="facing"
+      @actionComplete="onActionComplete()"
     />
     <Controls
       :canMoveForwards="canMoveForwards"
@@ -39,6 +40,7 @@ export default class Sidebar extends Vue {
   x = 0;
   y = 0;
   viewportSize = 800;
+  isActionActive = false;
   updateSize!: () => void;
 
   get map(): MapDefinition {
@@ -68,15 +70,27 @@ export default class Sidebar extends Vue {
     this.facing = start.direction;
   }
 
+  onActionComplete(): void {
+    this.isActionActive = false;
+  }
+
   turnRight(): void {
+    if (this.isActionActive) return;
+    this.isActionActive = true;
     this.facing = rightFrom(this.facing);
   }
 
   turnLeft(): void {
+    if (this.isActionActive) return;
+    this.isActionActive = true;
     this.facing = leftFrom(this.facing);
   }
 
   goForwards(): void {
+    if (this.isActionActive || !canMoveForwards(this.map, this.x, this.y, this.facing)) {
+      return;
+    }
+    this.isActionActive = true;
     const move = goTowards(this.facing);
     this.x += move.x;
     this.y += move.y;

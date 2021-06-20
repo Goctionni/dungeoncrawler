@@ -1,13 +1,16 @@
-# v1
-- create standalone viewer
-- wad keybinding voor viewer
-- create script that adds map to setup
-- create macro that uses the standalone viewer script at given position
-- create script that poops everything out as zip
-- isolate CSS using shadow-dom `https://www.robpeck.com/2020/04/using-vue-single-file-components-inside-shadow-dom/`
+- include textures in download
+- editable sugarcube html template
+- minimap component
+- media library
+- info bubbles
+  - tool keybindings apply, dont set
+  - double click for start position
+- doors
+- items
+  - item editor
+- better css isolation / name-spacing
 - better control over starting position & direction
 - allow changing project name
-- allow changing map name
 
 
 # v2

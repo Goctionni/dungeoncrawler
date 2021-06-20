@@ -17,7 +17,7 @@ export default class Sidebar extends Vue {
 
   created(): void {
     this.keyboardListener = (e: KeyboardEvent) => {
-      if (e.key === 'w') return this.$emit('goForwards');
+      if (e.key === 'w' && this.canMoveForwards) return this.$emit('goForwards');
       if (e.key === 'a') return this.$emit('turnLeft');
       if (e.key === 'd') return this.$emit('turnRight');
     };

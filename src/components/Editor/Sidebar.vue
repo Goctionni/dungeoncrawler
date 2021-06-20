@@ -64,6 +64,7 @@
 import { Tool, MapViewMode, Size } from '@/types/Map.types';
 import { Texture } from '@/types/Texture.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Dialogs } from '../Dialog/dialogs';
 
 import TextureEditor from './TextureEditor.vue';
 
@@ -149,8 +150,10 @@ export default class Sidebar extends Vue {
     this.editingTexture = texture;
   }
 
-  removeTexture(texture: string): void {
-    this.$emit('removeTexture', texture);
+  async removeTexture(texture: string): Promise<void> {
+    if (await Dialogs.confirm('Delete texture', 'are you sure you want to delete this texture?', ['No', '!Yes']) === 'Yes') {
+      this.$emit('removeTexture', texture);
+    }
   }
 
   saveTexture(oldName: string, texture: Texture): void {

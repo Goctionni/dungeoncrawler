@@ -104,12 +104,12 @@ export default class Editor extends Vue {
     Object.assign(window, { GameEditor: this });
   }
 
-  updateTile({ tile, tool }: { tile: Tile, tool: Tool }): void {
+  updateTile({ tile, tool, clear }: { tile: Tile, tool: Tool, clear?: boolean }): void {
     const {x, y} = tile;
     const pos = `${x}:${y}`;
 
     const posTile = this.tiles[pos] || createEmptyTile(x, y);
-    posTile[tool] = this.activeTexture;
+    posTile[tool] = clear ? '' : this.activeTexture;
     // Remove the tool from tile faces
     posTile.faces = posTile.faces.filter((face) => face !== tool);
     // But if texture isnt empty, add it back
