@@ -1,5 +1,5 @@
 <template>
-  <div class="viewer">
+  <div class="viewer" :style="{ '--viewportSize': `${viewportSize}px` }">
     <GameView
       :map="map"
       :x="x"
@@ -35,17 +35,29 @@ export default class Sidebar extends Vue {
   @InjectReactive() project!: ProjectDefintion;
   @InjectReactive() selectedMap!: string;
 
+  facing: Facing = 'north';
+  x = 0;
+  y = 0;
+  viewportSize = 800;
+  updateSize!: () => void;
+
   get map(): MapDefinition {
     const { project, selectedMap } = this;
     return project.maps.find((map) => map.name === selectedMap) || project.maps[0];
   }
 
-  facing: Facing = 'north';
-  x = 0;
-  y = 0;
-
   get canMoveForwards(): boolean {
     return canMoveForwards(this.map, this.x, this.y, this.facing);
+  }
+
+  mounted(): void {
+    this.updateSize = () => { this.viewportSize = Math.min(800, window.innerHeight - 160); };
+    this.updateSize();
+    window.addEventListener('resize', this.updateSize);
+  }
+
+  beforeDestroy(): void {
+    window.removeEventListener('resize', this.updateSize);
   }
 
   @Watch('map.start', { immediate: true, deep: true })
@@ -74,13 +86,9 @@ export default class Sidebar extends Vue {
 
 <style lang="scss" scoped>
 .viewer {
-  --viewportSize: 800px;
-  position: fixed;
   display: flex;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   width: calc(1.5 * var(--viewportSize));
   gap: 10px;
+  padding: 20px;  
 }
 </style>

@@ -71,7 +71,11 @@ export default class Map extends Vue {
   }
 
   setStart(tile: Tile): void {
-    this.$emit('setStart', tile);
+    this.$emit('setStart', {
+      x: tile.x,
+      y: tile.y,
+      direction: 'north',
+    });
   }
 
   created(): void {
