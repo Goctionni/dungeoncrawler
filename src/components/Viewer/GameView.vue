@@ -196,25 +196,25 @@ export default class Sidebar extends Vue {
 .player.facing-north {
   transform: rotateZ(0deg);
   .map {
-    top: calc(-1 * (var(--viewportYOffset) - 0.5) * var(--viewportSize));
+    top: calc(-1 * (var(--viewportYOffset) - 0.8) * var(--viewportSize));
   }
 }
 .player.facing-east {
   transform: rotateZ(270deg);
   .map {
-    left: calc(-1 * (var(--viewportXOffset) + 0.5) * var(--viewportSize));
+    left: calc(-1 * (var(--viewportXOffset) + 0.8) * var(--viewportSize));
   }
 }
 .player.facing-south {
   transform: rotateZ(180deg);
   .map {
-    top: calc(-1 * (var(--viewportYOffset) + 0.5) * var(--viewportSize));
+    top: calc(-1 * (var(--viewportYOffset) + 0.8) * var(--viewportSize));
   }
 }
 .player.facing-west {
   transform: rotateZ(90deg);
   .map {
-    left: calc(-1 * (var(--viewportXOffset) - 0.5) * var(--viewportSize));
+    left: calc(-1 * (var(--viewportXOffset) - 0.8) * var(--viewportSize));
   }
 }
 
