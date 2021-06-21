@@ -21,7 +21,7 @@ import { Component, Vue, Watch, InjectReactive } from "vue-property-decorator";
 
 import { MapDefinition, ProjectDefintion } from "@/types/Map.types";
 import { Facing } from "@/types/Map.types";
-import { canMoveForwards, goTowards, leftFrom, rightFrom } from '@/util/helper';
+import { canMoveForwards, goTowards, leftFrom, rightFrom } from '@/util/map-helper';
 
 import GameView from './GameView.vue';
 import Controls from './Controls.vue';

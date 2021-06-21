@@ -32,7 +32,7 @@
 import { MapDefinition } from "@/types/Map.types";
 import { Facing, Row } from "@/types/Map.types";
 import { createEmptyTile } from "@/util";
-import { leftFrom, rightFrom } from "@/util/helper";
+import { leftFrom, rightFrom } from "@/util/map-helper";
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;

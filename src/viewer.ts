@@ -2,7 +2,7 @@ import Vue from 'vue'
 import GameView from './components/Viewer/GameView.vue'
 import Controls from './components/Viewer/Controls.vue'
 
-import * as helper from '@/util/helper';
+import * as helper from '@/util/map-helper';
 import { Facing, MapDefinition } from './types/Map.types';
 
 Vue.config.productionTip = false

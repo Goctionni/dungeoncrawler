@@ -55,6 +55,8 @@ import ProjectManager from '@/components/ProjectManager/ProjectManager.vue';
 import MapPicker from '@/components/MapPicker/MapPicker.vue';
 import { store } from './store';
 import { ProjectListItem } from './types/store.types';
+import { getUsedTextures, getTextureBlobsAndFiles } from '@/util/texture-helper';
+import { Texture } from './types/Texture.types';
 
 type AppState = 'editor' | 'viewer' | 'project-manager';
 interface TwineDungeonCrawlerData {
@@ -83,18 +85,7 @@ export default class App extends Vue {
   @Prop() test!: number;
 
   get textureCSS(): string {
-    return this.project?.textures.map((texture): string => {
-      let cssBody = '';
-      for (const property of texture.properties) {
-        const { name, value } = property;
-        if (!value) { // Specialcase! Probably like `&::before` { or whatever
-          cssBody += name.replace(/&/g, `.texture__${name}`);
-        } else {
-          cssBody += `${name}: ${value};`;
-        }
-      }
-      return `.texture__${texture.name} { ${cssBody} }`;
-    }).join(' ') || '';
+    return this.project ? this.generateTextureCSS(this.project.textures) : '';
   }
 
   @Watch('project', { immediate: true })
@@ -109,6 +100,21 @@ export default class App extends Vue {
     } else {
       return this.loadSave(data.activeSave);
     }
+  }
+
+  generateTextureCSS(textures: Texture[]): string {
+    return textures.map((texture): string => {
+      let cssBody = '';
+      for (const property of texture.properties) {
+        const { name, value } = property;
+        if (!value) { // Specialcase! Probably like `&::before` { or whatever
+          cssBody += name.replace(/&/g, `.texture__${name}`);
+        } else {
+          cssBody += `${name}: ${value};`;
+        }
+      }
+      return `.texture__${texture.name} { ${cssBody} }`;
+    }).join(' ') || '';
   }
 
   loadSave(name: string): boolean {
@@ -164,7 +170,20 @@ export default class App extends Vue {
     zip.file('tdc/tdc-setup.js', setupScript);
 
     // textures
-    zip.file('tdc/tdc-textures.css', this.textureCSS);
+    const textures = getUsedTextures(this.project);
+    let textureCSS = this.generateTextureCSS(textures);
+    const imagesAndBlobs = await getTextureBlobsAndFiles(textureCSS);
+    for (let imageAndBlob of imagesAndBlobs) {
+      let filepath = `textures/${imageAndBlob.filename}`;
+      if (imageAndBlob.url.includes(filepath)) {
+        filepath = filepath.replace('textures/', `textures/${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36)}_`);
+      }
+      zip.file(filepath, imageAndBlob.blob);
+      while (textureCSS.includes(imageAndBlob.url)) {
+        textureCSS = textureCSS.replace(imageAndBlob.url, filepath);
+      }
+    }
+    zip.file('tdc/tdc-textures.css', textureCSS);
     zip.file('tdc/tdc-nofade.css', `.passage.tdc { transition-property: none; }`);
 
     // viewer plugin
