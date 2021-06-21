@@ -59,15 +59,9 @@ import { getUsedTextures, getTextureBlobsAndFiles } from '@/util/texture-helper'
 import { Texture } from './types/Texture.types';
 
 type AppState = 'editor' | 'viewer' | 'project-manager';
-interface TwineDungeonCrawlerData {
-  activeSave?: string;
-}
-
 interface MapsData {
   [name: string]: MapDefinition;
 }
-
-const lsPrefix = 'tdc_';
 
 @Component({
   components: {
@@ -93,34 +87,14 @@ export default class App extends Vue {
     this.selectedMap = this.project?.maps[0].name || '';
   }
 
-  initSaves(): boolean {
-    const data: TwineDungeonCrawlerData = JSON.parse(localStorage[`${lsPrefix}global`] || '{}');
-    if (!data?.activeSave) {
-      return false;
-    } else {
-      return this.loadSave(data.activeSave);
-    }
-  }
-
   generateTextureCSS(textures: Texture[]): string {
     return textures.map((texture): string => {
-      let cssBody = '';
-      for (const property of texture.properties) {
+      const cssBody = texture.properties.map((property) => {
         const { name, value } = property;
-        if (!value) { // Specialcase! Probably like `&::before` { or whatever
-          cssBody += name.replace(/&/g, `.texture__${name}`);
-        } else {
-          cssBody += `${name}: ${value};`;
-        }
-      }
-      return `.texture__${texture.name} { ${cssBody} }`;
-    }).join(' ') || '';
-  }
-
-  loadSave(name: string): boolean {
-    if (!localStorage[`${lsPrefix}${name}`]) return false;
-    // actually load stuff
-    return true;
+        return `  ${name}: ${value};`
+      }).join('\n');
+      return `.texture__${texture.name} {\n${cssBody}\n}`;
+    }).join('\n\n') || '';
   }
 
   initStyleTarget(): void {
