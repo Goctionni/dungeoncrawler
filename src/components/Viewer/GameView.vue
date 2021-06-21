@@ -78,10 +78,12 @@ export default class Sidebar extends Vue {
       if (facing === 'east') x--;
       if (facing === 'west') x++;
     } else if (action === 'turn-right') {
-      wasFacing = leftFrom(facing);
-    } else if (action === 'turn-left') {
       wasFacing = rightFrom(facing);
+    } else if (action === 'turn-left') {
+      wasFacing = leftFrom(facing);
     }
+
+    const playerTile = this.map.tiles[`${x}:${y}`];
 
     return rows.map((row) => {
       return row.map((tile) => {
@@ -92,7 +94,16 @@ export default class Sidebar extends Vue {
         if (facedDirections.includes('east') && tile.x >= x) shouldHide = false;
         if (facedDirections.includes('west') && tile.x <= x) shouldHide = false;
 
-        return shouldHide ? tile : tile;
+        if (action !== 'go-forwards' && !shouldHide) {
+          if (tile.x === x || tile.y === y) {
+            if (playerTile.north && tile.y < y && tile.south) tile = { ...tile, south: '' };
+            if (playerTile.south && tile.y > y && tile.north) tile = { ...tile, north: '' };
+            if (playerTile.west && tile.x < x && tile.east) tile = { ...tile, east: '' };
+            if (playerTile.east && tile.x > x && tile.west) tile = { ...tile, west: '' };
+          }
+        }
+
+        return shouldHide ? createEmptyTile(tile.x, tile.y) : tile;
       });
     });
   }
