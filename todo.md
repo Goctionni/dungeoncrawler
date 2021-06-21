@@ -12,13 +12,18 @@
 - info bubbles
   - tool keybindings apply, dont set
   - double click for start position
+- include a readme in the zip
+- better css isolation / name-spacing
 - doors
 - items
   - item editor
-- better css isolation / name-spacing
 - better control over starting position & direction
 - allow changing project name
-
+- if there's a double wall, you can get your view blocked
+- player facing sprite (ala doom)
+- export options
+  - one file per passage / one file per map
+  - include textures
 
 # v2
 - use localforage to create local blob storage
@@ -26,4 +31,5 @@
 - add items/monsters on tiles
 - doors
 - allow movement of monsters
+- mass apply stuff
 
