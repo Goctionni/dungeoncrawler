@@ -1,8 +1,3 @@
-- include textures in download
-- editable sugarcube html template
-  - widget?
-  - buttons with data-tdc="turn-left" etc
-  - note: also support "turn-180" and "go-backwards" options
 - rename "viewer" tab to "preview"
 - minimap component
 - numeric texture keybindings
@@ -26,6 +21,7 @@
   - include textures
 
 # v2
+- also support "turn-180" and "go-backwards" buttons
 - use localforage to create local blob storage
 - map view
 - add items/monsters on tiles

@@ -32,14 +32,14 @@
 import { MapDefinition } from "@/types/Map.types";
 import { Facing, Row } from "@/types/Map.types";
 import { createEmptyTile } from "@/util";
-import { leftFrom, rightFrom } from "@/util/map-helper";
+import { IGameView, leftFrom, rightFrom } from "@/util/map-helper";
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;
 const directions: Facing[] = ['north', 'east', 'south', 'west'];
 
 @Component
-export default class Sidebar extends Vue {
+export default class Sidebar extends Vue implements IGameView {
   @Prop() readonly map!: MapDefinition;
   @Prop() readonly x!: number;
   @Prop() readonly y!: number;

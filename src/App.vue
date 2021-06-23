@@ -57,6 +57,7 @@ import { store } from './store';
 import { ProjectListItem } from './types/store.types';
 import { getUsedTextures, getTextureBlobsAndFiles } from '@/util/texture-helper';
 import { Texture } from './types/Texture.types';
+import { IGameView } from './util/map-helper';
 
 type AppState = 'editor' | 'viewer' | 'project-manager';
 interface MapsData {
@@ -169,14 +170,20 @@ export default class App extends Vue {
     const tdcMacroResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-macro.js');
     const tdcMacroJs = await tdcMacroResponse.text();
     zip.file('tdc/tdc-macro.js', tdcMacroJs);
+    
+    // TDC template
+    const tdcTemplateResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-template.tw');
+    const tdcTemplateJs = await tdcTemplateResponse.text();
+    zip.file('tdc/tdc-template.tw', tdcTemplateJs);
 
     // passages
     for(const map of this.project.maps) {
       const passages = Object.values(map.tiles).map((tile: Tile): string => {
         return `:: tdc-${map.name} (${tile.x},${tile.y}) [tdc]\n\n<<DungeonCrawler '${map.name}' ${tile.x} ${tile.y} $tdcFacing>><</DungeonCrawler>>\n`;
       });
-      const mapInitPassage = `:: tdc-${map.name} [tdc]\n\n<<DungeonCrawler '${map.name}'>><</DungeonCrawler>>\n`;
-      zip.file(`tdc-passages/${map.name}.tw`, [ mapInitPassage, ...passages].join('\n'));
+      const mapInitPassage = `:: tdc-${map.name} [tdc]\n\n<<DungeonCrawler '${map.name}'>><</DungeonCrawler>>\n` +
+        `<<done>><<replace ".tdc-description">>You enter the dungeon... (You can use this to place text into the sample UI)<</replace>><</done>>`;
+      zip.file(`tdc-passages/${map.name}.tw`, [ mapInitPassage, ...passages].join('\n\n'));
     }
 
     // zip the data

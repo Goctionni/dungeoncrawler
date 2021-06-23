@@ -1,0 +1,132 @@
+
+:: tdc widget template [widget nobr]
+/*
+    This is the HTML template for the Dungeon Crawler, you should feel free to edit this file however you like
+
+    > The 3D view of the game automatically gets put into the element with data-tdc="gameview"
+
+    > Game controls can either be injected by adding an element with data-tdc="controls", or
+      you can can be manually. Any elements with the data-tdc attribute values: turn-left, turn-right, go-forwards
+      will automatically be bound to the game's control-scheme
+
+    > This template will effectively be used in every DungeonCrawler passage, you can do things like use
+      <<replace .tdc-text-content>> to insert text into this template
+
+*/
+<<widget tdcTemplate>>
+    <div class="tdc-container">
+        <div class="tdc-gameview" data-tdc="gameview"></div>
+        <div class="tdc-avatar">
+            <!-- This is some placeholder content to give you an idea -->
+            <strong>Name:</strong> Adrian<br>
+            <strong>Age:</strong> 36<br>
+            <strong>HP:</strong> 20/30<br>
+        </div>
+        <div class="tdc-controls">
+            <button class="tdc-turn-left" data-tdc="turn-left">
+                Turn left
+                <span class="keybind-indicator">A</span>
+            </button>
+            <button class="tdc-go-forwards" data-tdc="go-forwards">
+                Go Forwards
+                <span class="keybind-indicator">W</span>
+            </button>
+            <button class="tdc-turn-right" data-tdc="turn-right">
+                Turn Right
+                <span class="keybind-indicator">D</span>
+            </button>
+        </div>
+        <div class="tdc-description"></div>
+    </div>
+<</widget>>
+
+
+:: tdc widget style [stylesheet]
+/*
+    This is the CSS/styling for the above template, you should also feel free to edit this however you wish
+*/
+.tdc-container {
+    display: grid;
+    grid-template-areas:
+        'gv gv gv'
+        'avatar controls description';
+    grid-template-columns: 200px 200px 1fr;
+    width: 800px;
+    gap: 5px;
+}
+
+.tdc-gameview {
+    grid-area: gv;
+}
+
+.tdc-avatar {
+    grid-area: avatar;
+    background-color: #000;
+}
+
+.tdc-controls {
+    grid-area: controls;
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+
+.tdc-controls > button {
+    position: relative;
+    font-size: 0;
+    color: transparent;
+    width: 30px;
+    padding: 5px;
+    background-color: #666;
+    border: 0;
+    margin-top: 16px;
+}
+
+.tdc-controls > button:hover {
+    background-color: #999;
+}
+
+.tdc-controls > button .keybind-indicator {
+    position: absolute;
+    right: 8px;
+    top: -16px;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFF;
+    z-index: 1;
+    background-color: #000;
+    font-size: 10px;
+}
+
+.tdc-controls > button::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: #FFF;
+}
+
+.tdc-turn-left::before {
+    clip-path: path('M 5 0 L 0 5 L 5 10 L 7 10 L 3 6 L 18 6 L 18 20 L 20 20 L 20 4 L 3 4 L 7 0 L 5 0');
+}
+
+.tdc-go-forwards::before {
+    clip-path: path('M 10 0 L 5 5 L 6 6 L 9 3 L 9 20 L 11 20 L 11 3 L 14 6 L 15 5 L 10 0');
+}
+
+.tdc-turn-right::before {
+    clip-path: path('M 5 0 L 0 5 L 5 10 L 7 10 L 3 6 L 18 6 L 18 20 L 20 20 L 20 4 L 3 4 L 7 0 L 5 0');
+    transform: scaleX(-100%);
+}
+
+.tdc-description {
+    background-color: #000;
+    grid-area: description;
+    padding: .25em .5em;
+    line-height: 1.25em;
+}
