@@ -8,7 +8,7 @@
     "build:viewer": "cross-env BUILD_VIEWER=true vue-cli-service build",
     "gh-build:editor": "cross-env GH_BUILD=true vue-cli-service build",
     "watch": "vue-cli-service build --watch",
-    "copy-macro": "cpx ./viewer-static/* ./dist/viewer",
+    "copy-macro": "cpx \"./viewer-static/**/*\" ./dist/viewer",
     "deploy:editor": "cross-env npm run gh-build:editor && gh-pages -d dist/editor -b gh-pages -f",
     "deploy:viewer": "cross-env npm run build:viewer && npm run copy-macro && gh-pages -d dist/viewer -b viewerjs -f",
     "deploy": "cross-env npm run deploy:editor && npm run deploy:viewer",
