@@ -57,7 +57,6 @@ import { store } from './store';
 import { ProjectListItem } from './types/store.types';
 import { getUsedTextures, getTextureBlobsAndFiles } from '@/util/texture-helper';
 import { Texture } from './types/Texture.types';
-import { IGameView } from './util/map-helper';
 
 type AppState = 'editor' | 'viewer' | 'project-manager';
 interface MapsData {
@@ -170,7 +169,7 @@ export default class App extends Vue {
     const tdcMacroResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-macro.js');
     const tdcMacroJs = await tdcMacroResponse.text();
     zip.file('tdc/tdc-macro.js', tdcMacroJs);
-    
+
     // TDC template
     const tdcTemplateResponse = await fetch('//raw.githubusercontent.com/Goctionni/dungeoncrawler/viewerjs/tdc-template.tw');
     const tdcTemplateJs = await tdcTemplateResponse.text();
