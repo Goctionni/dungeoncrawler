@@ -10,7 +10,7 @@
       will automatically be bound to the game's control-scheme
 
     > This template will effectively be used in every DungeonCrawler passage, you can do things like use
-      <<replace .tdc-text-content>> to insert text into this template
+      <<replace .tdc-description>> to insert text into this template
 
 */
 <<widget tdcTemplate>>
