@@ -1,5 +1,5 @@
 <template>
-  <div class="viewer" :style="{ '--viewportSize': `${viewportSize}px` }">
+  <div class="preview" :style="{ '--viewportSize': `${viewportSize}px` }">
     <GameView
       :map="map"
       :x="x"
@@ -7,32 +7,42 @@
       :facing="facing"
       @actionComplete="onActionComplete()"
     />
-    <Controls
-      :canMoveForwards="canMoveForwards"
-      @turnLeft="turnLeft()"
-      @turnRight="turnRight()"
-      @goForwards="goForwards()"
-    />
+    <div>
+      <Controls
+        :canMoveForwards="canMoveForwards"
+        @turnLeft="turnLeft()"
+        @turnRight="turnRight()"
+        @goForwards="goForwards()"
+      />
+      <div style="width: 300px; height: 300px; margin-top: 1em; background: black; padding: 1em;">
+        <MiniMap
+          :faces="minimapFaces"
+          :player="{ x, y, facing}"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Watch, InjectReactive } from "vue-property-decorator";
 
-import { MapDefinition, ProjectDefintion } from "@/types/Map.types";
+import { FacePos, faces, MapDefinition, ProjectDefintion } from "@/types/Map.types";
 import { Facing } from "@/types/Map.types";
 import { canMoveForwards, goTowards, leftFrom, rightFrom } from '@/util/map-helper';
 
 import GameView from './GameView.vue';
 import Controls from './Controls.vue';
+import MiniMap from './MiniMap.vue';
 
 @Component({
   components: {
     GameView,
     Controls,
+    MiniMap,
   },
 })
-export default class Sidebar extends Vue {
+export default class Preview extends Vue {
   @InjectReactive() project!: ProjectDefintion;
   @InjectReactive() selectedMap!: string;
 
@@ -42,6 +52,18 @@ export default class Sidebar extends Vue {
   viewportSize = 800;
   isActionActive = false;
   updateSize!: () => void;
+
+  get minimapFaces(): FacePos[] {
+    const { map } = this;
+    const tiles = Object.values(map.tiles);
+    const walls: FacePos[] = [];
+    for (const tile of tiles) {
+      for (const face of faces) {
+        if (tile[face]) walls.push({ x: tile.x, y: tile.y, facing: face});
+      }
+    }
+    return walls;
+  }
 
   get map(): MapDefinition {
     const { project, selectedMap } = this;
@@ -67,7 +89,7 @@ export default class Sidebar extends Vue {
     const { start } = this.map
     this.x = start.x;
     this.y = start.y;
-    this.facing = start.direction;
+    this.facing = start.facing;
   }
 
   onActionComplete(): void {
@@ -99,7 +121,7 @@ export default class Sidebar extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.viewer {
+.preview {
   display: flex;
   width: calc(1.5 * var(--viewportSize));
   gap: 10px;

@@ -39,7 +39,7 @@ type Action = 'turn-left' | 'turn-right' | 'go-forwards' | null;
 const directions: Facing[] = ['north', 'east', 'south', 'west'];
 
 @Component
-export default class Sidebar extends Vue implements IGameView {
+export default class GameView extends Vue implements IGameView {
   @Prop() readonly map!: MapDefinition;
   @Prop() readonly x!: number;
   @Prop() readonly y!: number;

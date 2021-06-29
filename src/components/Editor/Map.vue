@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { Row, Tile, Tool, MapViewMode } from '@/types/Map.types';
+import { Row, Tile, Face, MapViewMode } from '@/types/Map.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 type KeypressHandler = (e: KeyboardEvent) => void;
@@ -28,7 +28,7 @@ type KeypressHandler = (e: KeyboardEvent) => void;
 @Component
 export default class Map extends Vue {
   @Prop() rows!: Row[];
-  @Prop() activeTool!: Tool;
+  @Prop() activeTool!: Face;
   @Prop() activeTexture!: string;
   @Prop() mapViewMode!: MapViewMode;
   @Prop() startTile!: Tile | null;
@@ -65,7 +65,7 @@ export default class Map extends Vue {
     }
   }
 
-  updateTile(tile: Tile, tool?: Tool, clear?: boolean): void {
+  updateTile(tile: Tile, tool?: Face, clear?: boolean): void {
     if (!tool) tool = this.activeTool;
     this.$emit('updateTile', { tile, tool, clear });
   }
@@ -74,7 +74,7 @@ export default class Map extends Vue {
     this.$emit('setStart', {
       x: tile.x,
       y: tile.y,
-      direction: 'north',
+      facing: 'north',
     });
   }
 

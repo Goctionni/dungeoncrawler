@@ -11,9 +11,9 @@
         />
         <button
           type="button"
-          :class="{ active: state === 'viewer'}"
-          @click="state = 'viewer'"
-          v-text="'Viewer'"
+          :class="{ active: state === 'preview'}"
+          @click="state = 'preview'"
+          v-text="'Preview'"
         />
         <span class="separator"></span>
         <button v-if="project.hasUnsavedChanges" @click="saveProject()">Save changes</button>
@@ -35,10 +35,10 @@
       v-if="state === 'editor'"
       key="editor"
     />
-    <Viewer
-      v-if="state === 'viewer'"
-      :show="state === 'viewer'"
-      key="viewer"
+    <Preview
+      v-if="state === 'preview'"
+      :show="state === 'preview'"
+      key="preview"
     />
     {{ test }}
   </div>
@@ -50,7 +50,7 @@ import { Component, Prop, ProvideReactive, Vue, Watch } from 'vue-property-decor
 import { MapDefinition, ProjectDefintion, Tile } from '@/types/Map.types';
 
 import Editor from '@/components/Editor/Editor.vue';
-import Viewer from '@/components/Viewer/Viewer.vue';
+import Preview from '@/components/Viewer/Preview.vue';
 import ProjectManager from '@/components/ProjectManager/ProjectManager.vue';
 import MapPicker from '@/components/MapPicker/MapPicker.vue';
 import { store } from './store';
@@ -58,7 +58,7 @@ import { ProjectListItem } from './types/store.types';
 import { getUsedTextures, getTextureBlobsAndFiles } from '@/util/texture-helper';
 import { Texture } from './types/Texture.types';
 
-type AppState = 'editor' | 'viewer' | 'project-manager';
+type AppState = 'editor' | 'preview' | 'project-manager';
 interface MapsData {
   [name: string]: MapDefinition;
 }
@@ -66,7 +66,7 @@ interface MapsData {
 @Component({
   components: {
     Editor,
-    Viewer,
+    Preview,
     ProjectManager,
     MapPicker,
   },

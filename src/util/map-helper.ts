@@ -1,4 +1,4 @@
-import { Facing, MapDefinition, Pos } from "@/types/Map.types";
+import { FacePos, Facing, FacingPos, MapDefinition, Pos, Tile } from "@/types/Map.types";
 
 export const canMoveForwards = (map: MapDefinition, x: number, y: number, facing: Facing): boolean => {
     const tiles = map.tiles;
@@ -47,6 +47,33 @@ export const goTowards = (facing: Facing): Pos => {
   }
 }
 
+const hasFace = (knownFaces: FacePos[], face: FacePos): boolean => {
+  return knownFaces.some((f) => f.x === face.x && f.y === face.y && f.facing === face.facing);
+}
+
+export const addToKnownFaces = (player: FacingPos, map: MapDefinition, knownFaces: FacePos[]): FacePos[] => {
+  const playerPosKey = `${player.x}:${player.y}`;
+  const playerTile: Tile = map.tiles[playerPosKey];
+  if (!playerTile) return knownFaces;
+  knownFaces = knownFaces.slice();
+  for (const face of playerTile.faces) {
+    if (!playerTile[face]) continue;
+    const testFace = { x: playerTile.x, y: playerTile.y, facing: face };
+    if (!hasFace(knownFaces, testFace)) knownFaces.push(testFace);
+  }
+  if (!playerTile[player.facing]) {
+    const playerFacingDelta = goTowards(player.facing);
+    const playerFacingPos: Pos = { x: player.x + playerFacingDelta.x, y: player.y + playerFacingDelta.y };
+    const playerFacingKey = `${playerFacingPos.x}:${playerFacingPos.y}`;
+    const playerFacingTile = map.tiles[playerFacingKey];
+    if (playerFacingTile?.floor) {
+      const testFace: FacePos = { x: playerFacingPos.x, y: playerFacingPos.y, facing: 'floor' };
+      if (!hasFace(knownFaces, testFace)) knownFaces.push(testFace);
+    }
+  }
+  return knownFaces;
+};
+
 export interface IGameView extends Vue {
   map: MapDefinition;
   x: number;
@@ -66,7 +93,7 @@ interface ControlElements {
   btnGoForwards?: HTMLElement;
 }
 
-export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage, gameView: IGameView, controlElements: ControlElements): DestroyFn => {
+export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage, gameView: IGameView, controlElements: ControlElements, changeListener?: () => void): DestroyFn => {
   let isActionBusy = false;
   const { map, x, y } = gameView;
   let { facing } = gameView;
@@ -87,6 +114,7 @@ export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage
     gameView.facing = facing;
     variablesFn().tdcFacing = facing;
     updateCanMoveForwards();
+    if (changeListener) changeListener();
   };
 
   const turnLeft = () => {
@@ -106,6 +134,7 @@ export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage
     const move = goTowards(facing);
     gameView.x = x + move.x;
     gameView.y = y + move.y;
+    if (changeListener) changeListener();
 
     gameView.$on('actionComplete', (action: string) => {
       if (action === 'go-forwards') {

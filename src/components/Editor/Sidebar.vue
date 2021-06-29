@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { Tool, MapViewMode, Size } from '@/types/Map.types';
+import { Face, MapViewMode, Size } from '@/types/Map.types';
 import { Texture } from '@/types/Texture.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Dialogs } from '../Dialog/dialogs';
@@ -76,16 +76,16 @@ type WheelHandler = (e: WheelEvent) => void;
   },
 })
 export default class Sidebar extends Vue {
-  @Prop() activeTool!: Tool;
+  @Prop() activeTool!: Face;
   @Prop() activeTexture!: string;
   @Prop() mapViewMode!: MapViewMode;
-  @Prop() tools!: Tool[];
+  @Prop() tools!: Face[];
   @Prop() textures!: string[];
   @Prop() mapSize!: Size;
 
   editingTexture: string | null = null;
   wheelHandler: WheelHandler | null = null;
-  keyBindings: {[tool in Tool]: string} = {
+  keyBindings: {[tool in Face]: string} = {
     floor: 'f',
     north: 'w',
     east: 'd',
@@ -136,7 +136,7 @@ export default class Sidebar extends Vue {
   lastTexture(): void {
     const currentIndex = this.textures.indexOf(this.activeTexture);
     if ((currentIndex - 1) < 0) {
-      this.setTexture(this.textures.slice().pop() as Tool);
+      this.setTexture(this.textures.slice().pop() as Face);
     } else {
       this.setTexture(this.textures[currentIndex - 1]);
     }

@@ -42,7 +42,7 @@ import { Component, Vue } from 'vue-property-decorator';
 
 import { DEFAULT_TEXTURES } from '@/data/defaultTextures';
 import { DEFAULT_MAP_FACTORY } from '@/data/defaultMap';
-import { ProjectDefintion } from '@/types/Map.types';
+import { Facing, ProjectDefintion } from '@/types/Map.types';
 import { ProjectListItem } from '@/types/store.types';
 import { store } from '@/store';
 
@@ -75,6 +75,12 @@ export default class ProjectManager extends Vue {
       if (!guid) return alert('Error loading project!');
       const project = await store.getItem<ProjectDefintion>(`project__${guid}`);
       if (!project) return alert('Error loading project!');
+      for (const map of project.maps) {
+          const direction: Facing = (map.start as any)['direction']; // eslint-disable-line @typescript-eslint/no-explicit-any
+          if (!map.start.facing && direction) {
+              map.start.facing = direction;
+          }
+      }
       this.$emit('setProject', project);
   }
 

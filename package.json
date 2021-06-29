@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build:viewer": "cross-env BUILD_VIEWER=true vue-cli-service build",
+    "build:viewer--dev": "cross-env BUILD_VIEWER=true vue-cli-service build --mode=development",
     "gh-build:editor": "cross-env GH_BUILD=true vue-cli-service build",
     "watch": "vue-cli-service build --watch",
     "copy-macro": "cpx \"./viewer-static/**/*\" ./dist/viewer",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.2",
+    "@types/resize-observer-browser": "^0.1.5",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",

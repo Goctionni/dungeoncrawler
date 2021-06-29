@@ -30,7 +30,7 @@
 import { Texture } from '@/types/Texture.types';
 import { Component, Vue, InjectReactive } from 'vue-property-decorator';
 
-import { Row, Tile, Tool, tools, MapViewMode, ProjectDefintion, MapDefinition, StartPos, Size } from '@/types/Map.types';
+import { Row, Tile, Face, faces, MapViewMode, ProjectDefintion, MapDefinition, FacingPos, Size } from '@/types/Map.types';
 import { createEmptyTile } from '@/util';
 
 import Map from './Map.vue';
@@ -47,8 +47,8 @@ export default class Editor extends Vue {
   @InjectReactive() selectedMap!: string;
 
   mapViewMode: MapViewMode = 'individual';
-  tools: Tool[] = tools.slice();
-  activeTool: Tool = 'floor';
+  tools: Face[] = faces.slice();
+  activeTool: Face = 'floor';
   activeTexture = '';
 
   get map(): MapDefinition {
@@ -65,11 +65,11 @@ export default class Editor extends Vue {
     this.project.hasUnsavedChanges = true;
   }
 
-  get startTile(): StartPos {
+  get startTile(): FacingPos {
     return this.map.start;
   }
 
-  set startTile(start: StartPos) {
+  set startTile(start: FacingPos) {
     this.map.start = start;
     this.project.hasUnsavedChanges = true;
   }
@@ -104,7 +104,7 @@ export default class Editor extends Vue {
     Object.assign(window, { GameEditor: this });
   }
 
-  updateTile({ tile, tool, clear }: { tile: Tile, tool: Tool, clear?: boolean }): void {
+  updateTile({ tile, tool, clear }: { tile: Tile, tool: Face, clear?: boolean }): void {
     const {x, y} = tile;
     const pos = `${x}:${y}`;
 
@@ -141,7 +141,7 @@ export default class Editor extends Vue {
     this.project.hasUnsavedChanges = true;
   }
 
-  setStart(startTile: StartPos): void {
+  setStart(startTile: FacingPos): void {
     this.startTile = startTile;
     this.project.hasUnsavedChanges = true;
   }

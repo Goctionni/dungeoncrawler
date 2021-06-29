@@ -1,14 +1,14 @@
 import { Texture } from "@/types/Texture.types";
 
-export const tools = ['floor', 'north', 'east', 'south', 'west'] as const;
-export type Tool = typeof tools[number];
+export const faces = ['floor', 'north', 'east', 'south', 'west'] as const;
+export type Face = typeof faces[number];
 export type Tile = {
   floor: string;
   north: string;
   east: string;
   south: string;
   west: string;
-  faces: Tool[];
+  faces: Face[];
   x: number;
   y: number;
 };
@@ -28,8 +28,12 @@ export interface Pos {
 
 export type Size = Pos;
 
-export interface StartPos extends Pos {
-  direction: Facing;
+export interface FacingPos extends Pos {
+  facing: Facing;
+}
+
+export interface FacePos extends Pos {
+  facing: Face;
 }
 
 export interface ProjectDefintion {
@@ -43,6 +47,6 @@ export interface ProjectDefintion {
 export interface MapDefinition {
   name: string;
   size: Size;
-  start: StartPos;
+  start: FacingPos;
   tiles: { [pos: string]: Tile };
 }

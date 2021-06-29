@@ -11,7 +11,7 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 
 
 @Component
-export default class Sidebar extends Vue {
+export default class Controls extends Vue {
   @Prop() canMoveForwards!: boolean;
   keyboardListener!: (e: KeyboardEvent) => void;
 
