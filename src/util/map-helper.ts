@@ -1,4 +1,5 @@
 import { FacePos, Facing, FacingPos, MapDefinition, Pos, Tile } from "@/types/Map.types";
+import MiniMap from '@/components/Viewer/MiniMap.vue';
 
 export const canMoveForwards = (map: MapDefinition, x: number, y: number, facing: Facing): boolean => {
     const tiles = map.tiles;
@@ -74,6 +75,20 @@ export const addToKnownFaces = (player: FacingPos, map: MapDefinition, knownFace
   return knownFaces;
 };
 
+type Subscriber = () => void;
+export interface Emitter {
+  subscribe: (func: Subscriber) => void;
+  emit: () => void;
+}
+
+export const createEmitter = (): Emitter => {
+  const subscribers: Subscriber[] = [];
+  return {
+    subscribe: (func: Subscriber): void => { subscribers.push(func); },
+    emit: () => subscribers.forEach((sub) => sub()),
+  };
+};
+
 export interface IGameView extends Vue {
   map: MapDefinition;
   x: number;
@@ -81,9 +96,19 @@ export interface IGameView extends Vue {
   facing: Facing;
 }
 
+export interface IMiniMap extends Vue {
+  faces: FacePos[];
+  player: FacePos;
+}
+
 type GotoPassage = (passageName: string) => void;
 
-type VariablesFn = () => { tdcFacing: Facing };
+type VariablesFn = () => {
+  tdcFacing: Facing,
+  tdcMinimapKnownFaces: {
+    [mapName: string]: FacePos[];
+  }
+};
 
 type DestroyFn = () => void;
 
@@ -93,7 +118,7 @@ interface ControlElements {
   btnGoForwards?: HTMLElement;
 }
 
-export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage, gameView: IGameView, controlElements: ControlElements, changeListener?: () => void): DestroyFn => {
+export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage, gameView: IGameView, controlElements: ControlElements, emitter?: Emitter): DestroyFn => {
   let isActionBusy = false;
   const { map, x, y } = gameView;
   let { facing } = gameView;
@@ -114,7 +139,7 @@ export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage
     gameView.facing = facing;
     variablesFn().tdcFacing = facing;
     updateCanMoveForwards();
-    if (changeListener) changeListener();
+    if (emitter) emitter.emit();
   };
 
   const turnLeft = () => {
@@ -134,7 +159,7 @@ export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage
     const move = goTowards(facing);
     gameView.x = x + move.x;
     gameView.y = y + move.y;
-    if (changeListener) changeListener();
+    if (emitter) emitter.emit();
 
     gameView.$on('actionComplete', (action: string) => {
       if (action === 'go-forwards') {
@@ -173,3 +198,36 @@ export const setupControls = (variablesFn: VariablesFn, gotoPassage: GotoPassage
     gameView.$destroy();
   }
 };
+
+export const setupMinimap = (variablesFn: VariablesFn, gameView: IGameView, container: HTMLElement, emitter?: Emitter): IMiniMap => {
+  const map = gameView.map;
+  // Initialize currently known faces
+  let player = { x: gameView.x, y: gameView.y, facing: gameView.facing };
+  const tdcKnownFaces = variablesFn().tdcMinimapKnownFaces || {};
+  if (!tdcKnownFaces[map.name]) tdcKnownFaces[map.name] = [];
+  let knownFaces: FacePos[] = tdcKnownFaces[map.name];
+  // Reusable method of saving known faces
+  const saveKnownFaces = () => {
+    tdcKnownFaces[map.name] = knownFaces;
+    variablesFn().tdcMinimapKnownFaces = tdcKnownFaces;
+  }
+  // update known faces based on current player position
+  knownFaces = addToKnownFaces(player, map, knownFaces);
+  saveKnownFaces();
+
+  // Initialize minimap view
+  const target = document.createElement('div');
+  container.appendChild(target);
+  const minimap = new MiniMap({ propsData: { faces: knownFaces, player }}).$mount(target) as IMiniMap;
+
+  // When something changes (player moves or turns), update the minimap or stored data
+  emitter?.subscribe(() => {
+    player = { x: gameView.x, y: gameView.y, facing: gameView.facing };
+    minimap.player = player;
+    knownFaces = addToKnownFaces(player, map, knownFaces);
+    minimap.faces = knownFaces;
+    saveKnownFaces();
+  });
+
+  return minimap;
+}

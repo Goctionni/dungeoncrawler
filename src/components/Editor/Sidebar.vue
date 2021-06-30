@@ -17,7 +17,7 @@
       <label><input type="radio" v-model="mapViewModeModel" value="complete">Complete 3D</label>
     </div>
     <div class="tools">
-      <h2>Face</h2>
+      <h2>Face <span class="info-btn" :data-tooltip="faceTooltip">Info</span></h2>
       <div class="faces">
         <button
           v-for="tool in tools"
@@ -92,6 +92,8 @@ export default class Sidebar extends Vue {
     south: 's',
     west: 'a',
   };
+
+  faceTooltip = `Select what surface to paint your selected texture on (ie: the north/east/south/west wall of a tile, or the tile's floor).\n\nThe letters on the faces represent keybindings. These do not select a tool but instead apply selected texture on the given face for the hovered tile.`;
 
   get mapSizeXModel(): number {
     return this.mapSize.x;
@@ -383,5 +385,31 @@ export default class Sidebar extends Vue {
 
 .clear {
   background-color: rgba(255, 255, 255, .5);
+}
+
+.info-btn {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  font-size: 0;
+  color: transparent;
+  background-color: #468;
+  text-align: center;
+  border-radius: 50%;
+  line-height: 22px;
+  vertical-align: top;
+  cursor: pointer;
+  text-indent: -1px;
+  transition: background-color .4s ease-in-out;
+
+  &::first-letter {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 14px;
+    color: #FFF;
+  }
+
+  &:hover {
+    background-color: #6BF;
+  }
 }
 </style>

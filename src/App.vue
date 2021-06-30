@@ -223,6 +223,8 @@ html {
 body {
   overflow: auto;
 }
+
+@import './tooltip';
 </style>
 
 <style lang="scss" scoped>

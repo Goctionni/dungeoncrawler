@@ -13,6 +13,7 @@
 
 <script lang="ts">
 import { Pos, Face, FacePos, faces as allFaces } from '@/types/Map.types';
+import { IMiniMap } from '@/util/map-helper';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 type MiniTile = Face[];
@@ -33,7 +34,7 @@ const matchesPos = (pos: Pos, x: number, y: number): boolean => {
 }
 
 @Component
-export default class MiniMap extends Vue {
+export default class MiniMap extends Vue implements IMiniMap {
     @Prop() faces!: FacePos[];
     @Prop() player!: FacePos;
     observer!: ResizeObserver;

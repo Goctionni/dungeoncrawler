@@ -1,12 +1,10 @@
-- rename "viewer" tab to "preview"
-- minimap component
+- info bubbles
+  - tool keybindings apply, dont set
+  - double click for start position
 - numeric texture keybindings
 - when deleting a texture, all uses of that texture should be removed
 - some "clear entire tile" keybinding
 - media library
-- info bubbles
-  - tool keybindings apply, dont set
-  - double click for start position
 - include a readme in the zip
 - better css isolation / name-spacing
 - doors
