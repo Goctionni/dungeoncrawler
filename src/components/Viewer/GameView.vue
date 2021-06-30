@@ -95,7 +95,7 @@ export default class GameView extends Vue implements IGameView {
         if (facedDirections.includes('west') && tile.x <= x) shouldHide = false;
 
         if (action !== 'go-forwards' && !shouldHide) {
-          if (tile.x === x || tile.y === y) {
+          if ((tile.x === x || tile.y === y) && playerTile) {
             if (playerTile.north && tile.y < y && tile.south) tile = { ...tile, south: '' };
             if (playerTile.south && tile.y > y && tile.north) tile = { ...tile, north: '' };
             if (playerTile.west && tile.x < x && tile.east) tile = { ...tile, east: '' };

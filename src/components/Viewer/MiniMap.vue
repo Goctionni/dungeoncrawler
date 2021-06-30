@@ -90,8 +90,11 @@ export default class MiniMap extends Vue implements IMiniMap {
 
     updateSize(): void {
         const parent = this.$el.parentElement as HTMLElement;
-        this.size.x = parent.clientWidth || 200;
-        this.size.y = parent.clientHeight || this.size.x;
+        const parentComputedStyle = window.getComputedStyle(parent);
+        const xPadding = parseFloat(parentComputedStyle.paddingLeft.replace('px', '')) + parseFloat(parentComputedStyle.paddingRight.replace('px', ''));
+        const yPadding = parseFloat(parentComputedStyle.paddingTop.replace('px', '')) + parseFloat(parentComputedStyle.paddingBottom.replace('px', ''));
+        this.size.x = parent.clientWidth ? (parent.clientWidth - xPadding) : 200;
+        this.size.y = parent.clientHeight ? (parent.clientHeight - yPadding) : this.size.x;
     }
 
     mounted(): void {
