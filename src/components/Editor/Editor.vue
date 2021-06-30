@@ -16,12 +16,14 @@
       :textures="textures"
       :tools="tools"
       :mapSize="mapSize"
+      :startFacing="map.start.facing"
       @setTexture="activeTexture = $event"
       @setTool="activeTool = $event"
       @setMapViewMode="mapViewMode = $event"
       @setMapSize="setMapSize($event)"
       @saveTexture="saveTexture($event)"
       @removeTexture="removeTextureByName($event)"
+      @setStartFacing="setStartFacing($event)"
     />
   </div>
 </template>
@@ -30,7 +32,7 @@
 import { Texture } from '@/types/Texture.types';
 import { Component, Vue, InjectReactive } from 'vue-property-decorator';
 
-import { Row, Tile, Face, faces, MapViewMode, ProjectDefintion, MapDefinition, FacingPos, Size } from '@/types/Map.types';
+import { Row, Tile, Face, faces, MapViewMode, ProjectDefintion, MapDefinition, FacingPos, Size, Facing } from '@/types/Map.types';
 import { createEmptyTile } from '@/util';
 
 import Map from './Map.vue';
@@ -144,6 +146,10 @@ export default class Editor extends Vue {
   setStart(startTile: FacingPos): void {
     this.startTile = startTile;
     this.project.hasUnsavedChanges = true;
+  }
+
+  setStartFacing(facing: Facing): void {
+    this.setStart({ ...this.startTile, facing });
   }
 
   setMapSize(size: Size): void {

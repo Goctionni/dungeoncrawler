@@ -17,16 +17,28 @@
       <label><input type="radio" v-model="mapViewModeModel" value="complete">Complete 3D</label>
     </div>
     <div class="tools">
-      <h2>Face <span class="info-btn" :data-tooltip="faceTooltip">Info</span></h2>
-      <div class="faces">
-        <button
-          v-for="tool in tools"
-          :key="tool"
-          type="button"
-          class="tool-btn"
-          :class="{ active: tool === activeTool, [tool]: true}"
-          @click="setTool(tool)"
-        >{{ keyBindings[tool] }}</button>
+      <div class="flex">
+        <div>
+          <h2>Face <span class="info-btn" :data-tooltip="faceTooltip">Info</span></h2>
+          <div class="faces">
+            <button
+              v-for="tool in tools"
+              :key="tool"
+              type="button"
+              class="tool-btn"
+              :class="{ active: tool === activeTool, [tool]: true}"
+              @click="setTool(tool)"
+            >{{ keyBindings[tool] }}</button>
+          </div>
+        </div>
+        <div class="start-facing">
+          <h2>Starting point</h2>
+          <p>Double click a tile to start start position</p>
+          <label><input type="radio" name="startFacing" v-model="startFacingModel" value="north"> Facing north</label>
+          <label><input type="radio" name="startFacing" v-model="startFacingModel" value="east"> Facing east</label>
+          <label><input type="radio" name="startFacing" v-model="startFacingModel" value="south"> Facing south</label>
+          <label><input type="radio" name="startFacing" v-model="startFacingModel" value="west"> Facing west</label>
+        </div>
       </div>
     </div>
     <div class="textures">
@@ -61,7 +73,7 @@
 </template>
 
 <script lang="ts">
-import { Face, MapViewMode, Size } from '@/types/Map.types';
+import { Face, Facing, MapViewMode, Size } from '@/types/Map.types';
 import { Texture } from '@/types/Texture.types';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Dialogs } from '../Dialog/dialogs';
@@ -82,6 +94,7 @@ export default class Sidebar extends Vue {
   @Prop() tools!: Face[];
   @Prop() textures!: string[];
   @Prop() mapSize!: Size;
+  @Prop({ default: 'north' }) startFacing!: Facing;
 
   editingTexture: string | null = null;
   wheelHandler: WheelHandler | null = null;
@@ -116,6 +129,14 @@ export default class Sidebar extends Vue {
   }
   set mapViewModeModel(mapViewMode: MapViewMode) {
     this.$emit('setMapViewMode', mapViewMode);
+  }
+
+  get startFacingModel(): Facing {
+    return this.startFacing;
+  }
+
+  set startFacingModel(facing: Facing) {
+    this.$emit('setStartFacing', facing);
   }
 
   setTexture(texture: string): void {
@@ -195,6 +216,11 @@ export default class Sidebar extends Vue {
   }
 }
 
+.flex {
+  display: flex;
+  gap: 10px;
+}
+
 .mapsize {
   display: flex;
   flex-direction: column;
@@ -241,6 +267,28 @@ export default class Sidebar extends Vue {
 
     input[type="radio"] {
       margin-right: 1ch;
+    }
+  }
+}
+
+.start-facing {
+  p {
+    margin: .25em 0;
+    font-style: italic;
+  }
+  label {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    padding: 2px 0;
+
+    &:hover::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background-color: #DDD;
+      border-radius: 4px;
+      z-index: -1;
     }
   }
 }
