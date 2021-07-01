@@ -294,7 +294,7 @@ export default class Sidebar extends Vue {
 }
 
 .tools, .textures {
-  width: 500px;
+  width: 100%;
 
   > div {
     display: flex;

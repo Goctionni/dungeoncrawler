@@ -40,7 +40,6 @@
       :show="state === 'preview'"
       key="preview"
     />
-    {{ test }}
   </div>
 </template>
 
@@ -76,7 +75,6 @@ export default class App extends Vue {
   styleElement!: HTMLStyleElement;
   @ProvideReactive() project: ProjectDefintion | null = null;
   @ProvideReactive() selectedMap = '';
-  @Prop() test!: number;
 
   get textureCSS(): string {
     return this.project ? this.generateTextureCSS(this.project.textures) : '';
@@ -215,13 +213,7 @@ body, html {
   width: 100%;
   height: 100%;
   font-family: Arial, Helvetica, sans-serif;
-}
-
-html {
   overflow: hidden;
-}
-body {
-  overflow: auto;
 }
 
 @import './tooltip';
@@ -235,7 +227,7 @@ body {
   flex-direction: column;
 
   > :not(.appbar, .map-picker) {
-    flex: 1;
+    height: calc(100vh - 70px - 50px);
   }
 }
 
@@ -244,6 +236,7 @@ body {
   display: flex;
   gap: 5px;
   padding: .25em 1em;
+  height: 70px;
 
   h1 {
     color: #FFF;

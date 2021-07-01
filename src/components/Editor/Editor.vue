@@ -1,30 +1,34 @@
 <template>
   <div class="editor">
-    <Map
-      :rows="rows"
-      :activeTool="activeTool"
-      :activeTexture="activeTexture"
-      :mapViewMode="mapViewMode"
-      :startTile="startTile"
-      @updateTile="updateTile($event)"
-      @setStart="setStart($event)"
-    />
-    <Sidebar
-      :activeTool="activeTool"
-      :activeTexture="activeTexture"
-      :mapViewMode="mapViewMode"
-      :textures="textures"
-      :tools="tools"
-      :mapSize="mapSize"
-      :startFacing="map.start.facing"
-      @setTexture="activeTexture = $event"
-      @setTool="activeTool = $event"
-      @setMapViewMode="mapViewMode = $event"
-      @setMapSize="setMapSize($event)"
-      @saveTexture="saveTexture($event)"
-      @removeTexture="removeTextureByName($event)"
-      @setStartFacing="setStartFacing($event)"
-    />
+    <div class="editor-map">
+      <Map
+        :rows="rows"
+        :activeTool="activeTool"
+        :activeTexture="activeTexture"
+        :mapViewMode="mapViewMode"
+        :startTile="startTile"
+        @updateTile="updateTile($event)"
+        @setStart="setStart($event)"
+      />
+    </div>
+    <div class="editor-sidebar">
+      <Sidebar
+        :activeTool="activeTool"
+        :activeTexture="activeTexture"
+        :mapViewMode="mapViewMode"
+        :textures="textures"
+        :tools="tools"
+        :mapSize="mapSize"
+        :startFacing="map.start.facing"
+        @setTexture="activeTexture = $event"
+        @setTool="activeTool = $event"
+        @setMapViewMode="mapViewMode = $event"
+        @setMapSize="setMapSize($event)"
+        @saveTexture="saveTexture($event)"
+        @removeTexture="removeTextureByName($event)"
+        @setStartFacing="setStartFacing($event)"
+      />
+    </div>
   </div>
 </template>
 
@@ -163,5 +167,14 @@ export default class Editor extends Vue {
 .editor {
   display: flex;
   padding: 10px;
+}
+
+.editor-map {
+  width: calc(100% - 490px);
+  overflow: hidden;
+}
+
+.editor-sidebar {
+  width: 470px;
 }
 </style>

@@ -115,6 +115,7 @@ export default class MapPicker extends Vue {
   border-bottom: solid #000 1px;
   justify-content: flex-start;
   align-items: flex-end;
+  height: 50px;
 }
 .tab {
   display: flex;

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" :style="{ '--numRows': rows.length, '--numCols': rows[0].length }">
     <div class="map" :class="mapViewMode">
       <div class="row" v-for="(row, r) in rowsWithHover" :key="r">
         <div
@@ -108,17 +108,25 @@ export default class Map extends Vue {
 @import '../../faces';
 
 .container {
-  overflow: hidden;
+  height: fit-content;
+  width: fit-content;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  // These 157 and 525 are magic numbers. :(
+  --vMargin: max(10px, calc((100vh - 157px - (var(--numRows) * 100px)) / 2));
+  --hMargin: max(10px, calc((100vw - 525px - (var(--numCols) * 100px)) / 2));
+  padding: var(--vMargin) var(--hMargin);
+  background-color: #333;
 }
 
 .map {
-  display: flex;
-  flex-direction: column;
   --tileSize: 100px;
 
   &.individual .tile {
-    --tileSize: 85px;
-    margin: calc((100px - var(--tileSize)) / 2);
+    margin: calc((var(--tileSize) - 85px) / 2);
+    width: 85px;
+    height: 85px;
     transform-style: preserve-3d;
     transform: perspective(500px);
   }
@@ -131,11 +139,13 @@ export default class Map extends Vue {
 }
 
 .row {
-  display: flex;
+  white-space: nowrap;
+  height: var(--tileSize);
 }
 
 .tile {
-  border: solid #000 1px;
+  display: inline-block;
+  border: solid #FFF 1px;
   width: var(--tileSize);
   height: var(--tileSize);
   position: relative;

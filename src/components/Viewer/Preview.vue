@@ -16,7 +16,7 @@
       />
       <div style="width: 300px; height: 300px; margin-top: 1em; background: black; padding: 1em;">
         <MiniMap
-          :faces="minimapFaces"
+          :faces="knownFaces"
           :player="{ x, y, facing}"
         />
       </div>
@@ -27,9 +27,9 @@
 <script lang="ts">
 import { Component, Vue, Watch, InjectReactive } from "vue-property-decorator";
 
-import { FacePos, faces, MapDefinition, ProjectDefintion } from "@/types/Map.types";
+import { FacePos, MapDefinition, ProjectDefintion } from "@/types/Map.types";
 import { Facing } from "@/types/Map.types";
-import { canMoveForwards, goTowards, leftFrom, rightFrom } from '@/util/map-helper';
+import { addToKnownFaces, canMoveForwards, goTowards, leftFrom, rightFrom } from '@/util/map-helper';
 
 import GameView from './GameView.vue';
 import Controls from './Controls.vue';
@@ -52,18 +52,7 @@ export default class Preview extends Vue {
   viewportSize = 800;
   isActionActive = false;
   updateSize!: () => void;
-
-  get minimapFaces(): FacePos[] {
-    const { map } = this;
-    const tiles = Object.values(map.tiles);
-    const walls: FacePos[] = [];
-    for (const tile of tiles) {
-      for (const face of faces) {
-        if (tile[face]) walls.push({ x: tile.x, y: tile.y, facing: face});
-      }
-    }
-    return walls;
-  }
+  knownFaces: FacePos[] = [];
 
   get map(): MapDefinition {
     const { project, selectedMap } = this;
@@ -72,6 +61,13 @@ export default class Preview extends Vue {
 
   get canMoveForwards(): boolean {
     return canMoveForwards(this.map, this.x, this.y, this.facing);
+  }
+
+  @Watch('x')
+  @Watch('y')
+  @Watch('facing', { immediate: true })
+  updateKnownTiles(): void {
+    this.knownFaces = addToKnownFaces({ x: this.x, y: this.y, facing: this.facing }, this.map, this.knownFaces);
   }
 
   mounted(): void {
