@@ -193,8 +193,11 @@ export default class GameView extends Vue implements IGameView {
   height: var(--viewportSize);
   outline: solid #000 1px;
   outline-offset: -1px;
-  transform-style: preserve-3d;
   perspective: calc(1.5 * var(--viewportSize));
+
+  &, & * {
+    transform-style: preserve-3d;
+  }
 }
 
 .map {
@@ -232,16 +235,13 @@ export default class GameView extends Vue implements IGameView {
 .player, .tilt {
   width: var(--viewportSize);
   height: var(--viewportSize);
-  transform-style: preserve-3d;
 }
 
 .player {
   transition: transform ease-in-out .5s;
-  transform-style: preserve-3d;
 }
 
 .tilt {
-  transform-style: preserve-3d;
   transform: rotateX(90deg);
   transform-origin: bottom;
 }

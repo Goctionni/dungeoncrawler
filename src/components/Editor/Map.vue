@@ -132,9 +132,12 @@ export default class Map extends Vue {
   }
 
   &.complete {
-    transform-style: preserve-3d;
     transform: perspective(1000px);
     padding: var(--tileSize);
+
+    &, & * {
+      transform-style: preserve-3d;
+    }
   }
 }
 
